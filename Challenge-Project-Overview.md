@@ -47,7 +47,7 @@ Call to Action: We recommend proceeding with this project, contingent on refinin
 # Cloud Detection in Very-High-Resolution Optical Satellite Imagery: Classical Signal Processing vs. Pretrained Deep Learning Models
 
 **Company / Org:** Ursa Space Systems  
-**Challenge Advisor:** Nicholas LaVigne, nicholas.lavigne@ursaspace.com  
+**Challenge Advisor:** John Savage, [Email address]  
 **Program:** Break Through Tech AI Studio - Fall 2026  
 
 ---
