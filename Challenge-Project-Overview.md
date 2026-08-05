@@ -48,7 +48,7 @@ Call to Action: We recommend proceeding with this project, contingent on refinin
 
 **Company / Org:** Ursa Space Systems  
 **Challenge Advisor:** John Savage, [Email address]  
-**AI Studio Coach:** Julio Contreras, Julio.Contreras@breakthroughtech.org
+**AI Studio Coach:** Julio Contreras, Julio.Contreras@breakthroughtech.org   
 **Program:** Break Through Tech AI Studio - Fall 2026  
 
 ---
