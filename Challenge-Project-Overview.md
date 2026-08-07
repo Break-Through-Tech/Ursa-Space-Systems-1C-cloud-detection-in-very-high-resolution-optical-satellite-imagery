@@ -60,19 +60,26 @@ Ursa Space Systems is a global leader in satellite intelligence, leveraging a vi
 
 ## 🎯 The Challenge
 ### Project Summary
-This challenge focuses on developing robust cloud-detection masks for very-high-resolution (VHR) satellite imagery to minimize data degradation in downstream analytics. Students will compare classical signal-processing techniques against modern computer-vision segmentation models to identify and mask cloud-covered pixels. This work is critical to improving the quality of satellite imagery products provided by Ursa Space Systems to its global customer base.
+In this project, you will use very-high-resolution (~30–50cm) optical satellite imagery from the Maxar/Vantor Open Data Program and classical image signal-processing techniques (e.g., brightness/saturation thresholding, the dark-channel prior, visible-band haze indices) compared against off-the-shelf pretrained computer-vision segmentation models to build and benchmark methods that automatically identify and mask cloud-covered regions in satellite scenes. This will help our company address the problem of cloud contamination in commercial VHR optical imagery, where clouds obscure ground features and degrade every downstream analytics and modeling product we build.
 
 ### Success Criteria
-Clear, reproducible comparison using standard segmentation metrics — Intersection-over-Union (IoU), precision/recall, F1 — on cloud vs. non-cloud pixels; a documented qualitative error analysis of where each method breaks; a clean notebook and writeup that identifies which approaches work best on VHR RGB imagery.
+Success is a clear, reproducible comparison rather than a single accuracy number, since there are no ground-truth masks. Concretely: (1) at least two classical methods and one pretrained model implemented and runnable end-to-end in free Colab; (2) evaluation against a small student-curated reference set using standard segmentation metrics — Intersection-over-Union (IoU), precision/recall, F1 — on cloud vs. non-cloud pixels; (3) a documented qualitative error analysis of where each method breaks (thin cloud, smoke, bright non-cloud surfaces). A successful December outcome is a clean notebook and writeup that says, with evidence, which approaches work best on VHR RGB imagery and why — something genuinely useful as an internal reference.
+
+### Stretch Goals
+(1) Test cross-scene/cross-event generalization — does a method tuned on a hurricane event hold up on a wildfire-smoke scene?
+(2) Bring in the multispectral product (adding NIR) and test whether an extra band improves the classical baselines. 
+(3) Fine-tune a small segmentation model (e.g., a compact U-Net) on a student-labeled subset and compare to the zero-shot and classical approaches. 
+(4) Build a simple cloud-cover percentage estimator and a "usable imagery" filter as a practical mini-product. 
+(5) Extend cloud detection to cloud-shadow detection, which is a related and harder problem.
 
 ### Project Milestones
 Use these milestones to guide your work. Your team will create a GitHub Projects board to track tasks within each milestone.
+
 | Month | Milestone | Key Activities |
-|-------|-----------|----------------|
-| **September** | Data Exploration & Preprocessing | Load and tile VHR imagery into manageable chunks, while performing initial visualization and descriptive statistics of cloud vs. non-cloud surface signatures. |
-| **October** | Feature Engineering & Baseline Modeling | Implement classical signal-processing thresholds (e.g., brightness, haze indices) and establish initial performance baselines for the segmentation models. |
-| **November** | Model Optimization & Evaluation | Refine model hyperparameters, execute comparative benchmarking runs across test scenes, and validate segmentation accuracy against ground-truth assumptions. |
-| **December** | Insights, Deliverables & Presentation | Synthesize results into a technical report, package the final cloud-masking codebase, and prepare a presentation summarizing findings for stakeholders. |
+|---|---|---|
+| September | Foundations & data | Students get comfortable in Colab and with geospatial Python (rasterio/leafmap), learn to stream and window-read cloud-optimized GeoTIFFs from the Maxar Open Data catalog, and assemble a small working set of VHR scenes deliberately filtered toward higher cloud cover. **Deliverable:** a notebook that loads, displays, and tiles VHR imagery, plus a short written characterization of what clouds, smoke, and cloud-like surfaces (snow, bright rooftops, sand) look like in these scenes. |
+| October | Classical baseline | Implement two or three signal-processing cloud-detection baselines in the RGB/visible domain (e.g., a brightness/saturation threshold, the dark-channel prior, a HOT-style index). Build a small hand-labeled or visually-assessed evaluation set so methods can be compared. **Deliverable:** a working classical cloud-mask pipeline plus a qualitative and quantitative comparison of the baselines. |
+| November | Pretrained models & comparison | Apply one or more off-the-shelf pretrained segmentation models (e.g., SAM in a zero-shot setup, and/or an existing RGB cloud-segmentation checkpoint) to the same scenes, then run a head-to-head comparison against the classical baselines on the same evaluation set, with attention to failure modes (smoke vs. cloud, bright surfaces misclassified as cloud). **Deliverable:** a final benchmark notebook, results writeup, and a short presentation of findings. |
 
 > **Note for the team:** Please create a GitHub Projects board in this repository to break these milestones into weekly tasks. Go to the **Projects** tab → **New project** → Choose **Board** → Add columns for each month.
 
@@ -82,54 +89,78 @@ Use these milestones to guide your work. Your team will create a GitHub Projects
 **Name and Source:** Maxar Open Data Program / Vantor  
 **Format:** Cloud-optimized GeoTIFFs  
 **Size:** over 10gb  
-**Location:** Accessible via Maxar Open Data Program portal or provided cloud buckets.  
+**Location:** https://radiantearth.github.io/stac-browser/#/external/maxar-opendata.s3.amazonaws.com/events/catalog.json
 
 ### Key Details
-- Very-high-resolution (~30–50cm) optical satellite imagery (cloud-optimized GeoTIFFs) from the Maxar Open Data Program.
-- Teams must implement preprocessing routines for handling coordinate reference systems (CRS) and normalizing image tiling to ensure model compatibility.
+- [Brief description of what's in the data]
+- [Any known limitations or preprocessing needed]
+- [Link to data dictionary or documentation, if available]
 
 ---
 
 ## 🛠️ Suggested Approach
-**ML Problem Type:** Computer Vision / Image Segmentation  
+
+**ML Problem Type:** Classification,Computer Vision,Deep Learning / Neural Networks,Transfer Learning / Pre-trained Models 
+
 **Recommended Libraries:**
-- Geospatial Python (rasterio, leafmap)
-- Google Colab
-- Computer-vision segmentation models (e.g., SAM, compact U-Net)
-**Evaluation Metrics:** Intersection-over-Union (IoU), Precision, Recall, and F1-Score for binary mask accuracy.
+- [e.g., pandas, scikit-learn, TensorFlow, Hugging Face]
+
+**Evaluation Metrics:**
+- [e.g., Accuracy, Precision/Recall, RMSE, BLEU score]
 
 ---
 
 ## 📚 Resources to Get Started
+
 The following resources will help your team understand the problem space and potential technical approaches for this project:
+
 **Background Reading:**
-- [Maxar Open Data Program Documentation](https://www.maxar.com/open-data)
+- [e.g., Link to an article or blog post about the problem domain]
+- [e.g., Link to an industry report or case study]
+
 **Technical Tutorials:**
-- [Rasterio Documentation for Geospatial Image Processing](https://rasterio.readthedocs.io/)
+- [e.g., Link to a free tutorial on the ML technique(s) involved]
+- [e.g., Link to documentation for a key library or tool]
+
 **Code Examples:**
-- [Segment Anything Model (SAM) GitHub Repository](https://github.com/facebookresearch/segment-anything)
+- [e.g., Link to a relevant GitHub repo]
+- [e.g., Link to a sample implementation or starter code]
+
+**Other:**
+- [Links to any additional resources — e.g., papers, videos, podcasts, etc.]
+
+*Feel free to explore beyond these, and share anything interesting you find with me!*
 
 ---
 
 ## 🤝 How We'll Work Together
-**Check-ins:** During our biweekly 60-min AI Studio Lab Section meeting block (2nd and 4th week of every month)  
-**Communication:** Via Slack and GitHub Discussions.  
-**Response time:** 24–48 hours for non-urgent inquiries.  
-**Recommended Tools:**
-- **Coding:** Google Colab Free Tier  
-- **Collaboration:** GitHub, Notion  
-- **Virtual Meetings:** Zoom, Google Meet  
+
+**Official check-ins:** During our biweekly 45-minute AI Studio Lab Section meeting block (2nd and 4th week of every month)
+
+ **Other ways to reach out to me with questions:** 
+* [e.g., Your team's channel within Break Through Tech’s Discord space]
+* [e.g., Email; please copy your teammates and AI Studio Coach]
+* [e.g., Request a team check-in on Zoom]
+* [Note: I will aim to respond within 48 hours. Please reach out to your AI Studio Coach with urgent questions.]
+
+> 💡 **Challenge Advisor: Please update the above based on your availability and preference. If you are not able to answer questions or meet with fellows outside of the biweekly Lab Section check-ins, simply write in "N/A (only available during the official check-in times)"**
+
+**Recommended free coding / collaboration tools**
+* […]
+* […]
 
 ---
 
 ## 🚀 Getting Started
-1. **Review this overview document** and note any questions for our first meeting.
-2. **Begin reviewing the dataset** using the link provided in the Dataset section.
-3. **Read the GitHub Projects documentation** [here](https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects).
 
-I'm excited to work with you!
+1. **Review this overview document** and note any questions for our first meeting
+2. **Begin reviewing the dataset** using the link above
+3. **Read the GitHub Projects documentation** [here](https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects)
+
+I’m excited to work with you!
 
 ---
 
 ## ❓ Questions?
-Please bring any questions to our first meeting during the week of August 24th (Break Through Tech's Bridge to Studio - Session B).
+
+Please bring any questions to our first meeting during the week of August 24th (Break Through Tech’s Bridge to Studio - Session C). 
