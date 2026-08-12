@@ -124,7 +124,26 @@ The following resources will help your team understand the problem space and pot
 
 **Code Examples:**
 - [e.g., Link to a relevant GitHub repo]
-- [e.g., Link to a sample implementation or starter code]
+#### Starter Code for Data Access
+
+```
+import geopandas as gpd
+from pystac_client import Client
+
+# Connect to the Maxar/Vantor Open Data STAC root
+catalog_url = "https://maxar-opendata.s3.amazonaws.com/events/catalog.json"
+client = Client.open(catalog_url)
+
+# Print all available disaster event collection IDs
+print("Available disaster events:")
+for collection in client.get_all_collections():
+    print(f"- {collection.id}")
+
+# Target a specific event (e.g., Morocco Earthquake or a specific flood event)
+# Replacing 'event-id' with an active collection name string listed above
+collection_id = "morocco-earthquake-sep-2023" 
+collection = client.get_collection(collection_id)
+```
 
 **Other:**
 - [Links to any additional resources — e.g., papers, videos, podcasts, etc.]
@@ -138,16 +157,15 @@ The following resources will help your team understand the problem space and pot
 **Official check-ins:** During our biweekly 45-minute AI Studio Lab Section meeting block (2nd and 4th week of every month)
 
  **Other ways to reach out to me with questions:** 
-* [e.g., Your team's channel within Break Through Tech’s Discord space]
-* [e.g., Email; please copy your teammates and AI Studio Coach]
-* [e.g., Request a team check-in on Zoom]
-* [Note: I will aim to respond within 48 hours. Please reach out to your AI Studio Coach with urgent questions.]
+* Reach out to me on Discord (or by email)
+  * Feel free to message individually as well 
+* Note: I will try to respond within 48 hours. Please reach out to your AI Studio Coach with urgent questions.
 
 > 💡 **Challenge Advisor: Please update the above based on your availability and preference. If you are not able to answer questions or meet with fellows outside of the biweekly Lab Section check-ins, simply write in "N/A (only available during the official check-in times)"**
 
 **Recommended free coding / collaboration tools**
-* […]
-* […]
+* [Google Colab](https://colab.research.google.com/)
+* Github (you are here)
 
 ---
 
@@ -157,7 +175,7 @@ The following resources will help your team understand the problem space and pot
 2. **Begin reviewing the dataset** using the link above
 3. **Read the GitHub Projects documentation** [here](https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects)
 
-I’m excited to work with you!
+Looking forwards to meeting you all and working this semester!
 
 ---
 
