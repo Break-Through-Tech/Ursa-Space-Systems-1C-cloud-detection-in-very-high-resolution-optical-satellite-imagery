@@ -92,9 +92,10 @@ Use these milestones to guide your work. Your team will create a GitHub Projects
 **Location:** https://radiantearth.github.io/stac-browser/#/external/maxar-opendata.s3.amazonaws.com/events/catalog.json
 
 ### Key Details
-- [Brief description of what's in the data]
-- [Any known limitations or preprocessing needed]
-- [Link to data dictionary or documentation, if available]
+- This catalog contains optical data from a number of natural disasters.
+- You will need to pick one (or more) disasters to pull imagery from
+- Within each disaster's catalog, there are composite images made up of smaller images (click around)
+- After clicking on the tiles (smaller images), you should see a preview of the satellite image.
 
 ---
 
@@ -103,7 +104,7 @@ Use these milestones to guide your work. Your team will create a GitHub Projects
 **ML Problem Type:** Classification,Computer Vision,Deep Learning / Neural Networks,Transfer Learning / Pre-trained Models 
 
 **Recommended Libraries:**
-- [e.g., pandas, scikit-learn, TensorFlow, Hugging Face]
+- rasterio, leafmap, pystac-client, fsspec, rio-tiler, geopandas, shapely, numpy, scikit-image, scipy, torch, torchvision, transformers, scikit-learn, matplotlib, lightning
 
 **Evaluation Metrics:**
 - [e.g., Accuracy, Precision/Recall, RMSE, BLEU score]
@@ -115,16 +116,12 @@ Use these milestones to guide your work. Your team will create a GitHub Projects
 The following resources will help your team understand the problem space and potential technical approaches for this project:
 
 **Background Reading:**
-- [e.g., Link to an article or blog post about the problem domain]
-- [e.g., Link to an industry report or case study]
+- [Cloud detection techniques high-level summary](https://www.nature.com/nature-index/topics/l4/cloud-detection-techniques-in-remote-sensing). Look at references for long-form papers
 
 **Technical Tutorials:**
-- [e.g., Link to a free tutorial on the ML technique(s) involved]
-- [e.g., Link to documentation for a key library or tool]
+- [Hugging Face cloud detection models](https://huggingface.co/search/full-text?q=cloud+detection&type=model)
 
-**Code Examples:**
-- [e.g., Link to a relevant GitHub repo]
-#### Starter Code for Data Access
+**Starter Code for Data Access:**
 
 ```
 import geopandas as gpd
@@ -146,9 +143,9 @@ collection = client.get_collection(collection_id)
 ```
 
 **Other:**
-- [Links to any additional resources — e.g., papers, videos, podcasts, etc.]
+- [Helpful video on U-Net architecture](https://www.youtube.com/watch?v=NhdzGfB1q74). Talks about image generation, but relevant.
 
-*Feel free to explore beyond these, and share anything interesting you find with me!*
+*Feel free to explore beyond these*
 
 ---
 
