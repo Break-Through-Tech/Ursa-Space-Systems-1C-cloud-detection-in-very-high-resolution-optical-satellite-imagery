@@ -61,7 +61,8 @@ Use these milestones to guide your work. Your team will create a GitHub Projects
 - rasterio, leafmap, pystac-client, fsspec, rio-tiler, geopandas, shapely, numpy, scikit-image, scipy, torch, torchvision, transformers, scikit-learn, matplotlib, lightning
 
 **Evaluation Metrics:**
-- [e.g., Accuracy, Precision/Recall, RMSE, BLEU score]
+- Intersection over Union (IoU), precision, recall, and F1, computed per-pixel on cloud vs. non-cloud
+- Qualitative error analysis of failure modes: thin cloud, smoke, bright non-cloud surfaces
 
 ---
 
