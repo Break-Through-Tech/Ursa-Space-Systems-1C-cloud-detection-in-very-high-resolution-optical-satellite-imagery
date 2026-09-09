@@ -19,7 +19,7 @@
 | Jordan Ramirez   | @jramirez     | Data collection, exploratory data analysis (EDA), dataset documentation  |
 >>>>>>> Stashed changes
 | Chidera Okafor     | @ChideraOkaforNJIT  | Data preprocessing, feature engineering, data validation                 |
-| Priya Mehta      | @pmehta       | Model selection, hyperparameter tuning, model training and optimization  |
+| Pari Panchal      | @paripanchall  |
 | Chris Park       | @chrispark    | Model evaluation, performance analysis, results interpretation           |
 
 ---
