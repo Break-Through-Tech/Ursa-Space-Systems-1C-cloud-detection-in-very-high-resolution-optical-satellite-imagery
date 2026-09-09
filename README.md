@@ -10,17 +10,12 @@
 
 | Name             | GitHub Handle | Contribution                                                             |
 |------------------|---------------|--------------------------------------------------------------------------|
-|Updated upstream
-| Taylor Nguyen    | @taylornguyen | Data exploration, visualization, overall project coordination            |
+|Updated upstream         |
 | Nurbu Lama   | @nurbu     | NA |
 | Sarrah Abdullahi | @sab2131 |  NA                                                                           |
 | Nina Khilnani    | @ninakhilnani |
-| Jordan Ramirez   | @jramirez     | Data collection, exploratory data analysis (EDA), dataset documentation  |
-Stashed changes
 | Chidera Okafor     | @ChideraOkaforNJIT  | Data preprocessing, feature engineering, data validation                 |
-| Pari Panchal      | @paripanchall  |
-| Chris Park       | @chrispark    | Model evaluation, performance analysis, results interpretation           |
-| Priya Mehta      | @pmehta       | Model selection, hyperparameter tuning, model training and optimization  |
+| Pari Panchal      | @paripanchall  |         |
 | Nathan Nguyen       | @nathannnguyenn    | Model evaluation, performance analysis, results interpretation           |
 
 ---
