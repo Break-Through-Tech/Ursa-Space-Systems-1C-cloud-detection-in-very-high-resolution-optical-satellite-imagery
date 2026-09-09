@@ -20,7 +20,7 @@
 >>>>>>> Stashed changes
 | Chidera Okafor     | @ChideraOkaforNJIT  | Data preprocessing, feature engineering, data validation                 |
 | Priya Mehta      | @pmehta       | Model selection, hyperparameter tuning, model training and optimization  |
-| Chris Park       | @chrispark    | Model evaluation, performance analysis, results interpretation           |
+| Nathan Nguyen       | @nathannnguyenn    | Model evaluation, performance analysis, results interpretation           |
 
 ---
 
