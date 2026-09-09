@@ -13,6 +13,7 @@
 <<<<<<< Updated upstream
 | Taylor Nguyen    | @taylornguyen | Data exploration, visualization, overall project coordination            |
 | Nurbu Lama   | @nurbu     | NA |
+| Sarrah Abdullahi | @sab2131 |  NA                                                                           |
 =======
 | Nina Khilnani    | @ninakhilnani | --                                                                       |
 | Jordan Ramirez   | @jramirez     | Data collection, exploratory data analysis (EDA), dataset documentation  |
