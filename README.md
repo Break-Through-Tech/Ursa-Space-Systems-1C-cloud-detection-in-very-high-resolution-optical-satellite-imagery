@@ -10,13 +10,12 @@
 
 | Name             | GitHub Handle | Contribution                                                             |
 |------------------|---------------|--------------------------------------------------------------------------|
-|Updated upstream         |
-| Nurbu Lama   | @nurbu     | NA |
-| Sarrah Abdullahi | @sab2131 |  NA                                                                           |
+| Nurbu Lama   | @nurbu     |
+| Sarrah Abdullahi | @sab2131 |                                                                    |
 | Nina Khilnani    | @ninakhilnani |
-| Chidera Okafor     | @ChideraOkaforNJIT  | Data preprocessing, feature engineering, data validation                 |
+| Chidera Okafor     | @ChideraOkaforNJIT  |
 | Pari Panchal      | @paripanchall  |         |
-| Nathan Nguyen       | @nathannnguyenn    | Model evaluation, performance analysis, results interpretation           |
+| Nathan Nguyen       | @nathannnguyenn    | 
 
 ---
 
@@ -33,13 +32,23 @@
 
 ## 👩🏽‍💻 **Setup and Installation**
 
-**Provide step-by-step instructions so someone else can run your code and reproduce your results. Depending on your setup, include:**
+## Primary Environment
+Our team has agreed to use **VS Code (Local)** as our primary development environment for this project.
 
-* How to clone the repository
-* How to install dependencies
-* How to set up the environment
-* How to access the dataset(s)
-* How to run the notebook or scripts
+## Getting Started
+Follow these steps to set up the Ursa Space Systems project code on your local machine:
+
+1. **Clone the repository:**
+   `git clone [insert-your-repo-link-here]`
+2. **Navigate to the project directory:**
+   `cd [insert-repository-name]`
+3. **Set up a virtual environment (optional but recommended):**
+   `python -m venv env`
+   `source env/bin/activate` (Mac/Linux) or `.\env\Scripts\activate` (Windows)
+4. **Install dependencies:**
+   `pip install -r requirements.txt`
+5. **Run the starter notebook:**
+   Launch Jupyter or open VS Code, open the starter notebook, and select "Run All" to confirm there are no errors.
 
 ---
 
