@@ -39,9 +39,9 @@ Our team has agreed to use **VS Code (Local)** as our primary development enviro
 Follow these steps to set up the Ursa Space Systems project code on your local machine:
 
 1. **Clone the repository:**
-   `git clone [insert-your-repo-link-here]`
+   `git clone https://github.com/Break-Through-Tech/Ursa-Space-Systems-1C-cloud-detection-in-very-high-resolution-optical-satellite-imagery/blob/main/Challenge-Project-Overview.md`
 2. **Navigate to the project directory:**
-   `cd [insert-repository-name]`
+   `cd Ursa-Space-Systems-1C-cloud-detection-in-very-high-resolution-optical-satellite-imagery`
 3. **Set up a virtual environment (optional but recommended):**
    `python -m venv env`
    `source env/bin/activate` (Mac/Linux) or `.\env\Scripts\activate` (Windows)
