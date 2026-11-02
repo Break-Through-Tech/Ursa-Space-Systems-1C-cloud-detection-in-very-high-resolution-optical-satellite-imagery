@@ -1,3 +1,6 @@
+Mini Zoom Meeting Summary from 9/29/2026
+Nurbu, Nina, and Chidera hopped in a zoom call and talked about the actual project goal, did a little preprocessing of the data to get a feel for it, talked about next steps for when the whole group is present.
+
 Next Steps for Wednesday meeting:
 Align on Project Goals: What is the actual goal of our project?
 Project Overview:
