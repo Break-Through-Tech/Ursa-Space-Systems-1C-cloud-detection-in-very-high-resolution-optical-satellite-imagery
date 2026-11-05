@@ -1,6 +1,4 @@
-Discord Check In 10/28/2026
-
-ERSA 1C coordinated cloud-mask work: split CVAT ground-truth labeling, got coach feedback on GitHub tracking and model exploration, and the CA advised packaging notebooks into Python files with a cli.py.
+URSA 1C coordinated cloud-mask work: split CVAT ground-truth labeling, got coach feedback on GitHub tracking and model exploration, and the CA advised packaging notebooks into Python files with a cli.py.
 
 Task Check-in and Mask Comparison
 Team agreed to review pending tasks and redistribute them after duplicated work and missed estimates during midterms.
