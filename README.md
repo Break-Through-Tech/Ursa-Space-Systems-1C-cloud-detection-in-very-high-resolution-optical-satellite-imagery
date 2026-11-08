@@ -216,10 +216,10 @@ This is our November plan as of early November. Statuses will change as we go.
 | 4 | Update this README and make sure everyone has added something to the GitHub repo | Nurbu | To do | |
 | 5 | Make and rehearse the final presentation | Everyone | To do | Nov 25 |
 | 6 | Add an "ensemble consensus" cell to the Colab notebook | Chidera | To do | Nov 11 |
-| 7 | If there's time, try building a one-page interactive web app for the repo | Chidera | To do | Nov 30 |
+| 7 | If there's time, try building a one-page interactive web app for the repo | Nina, Chidera | To do | Nov 30 |
 | 8 | Work with everyone on the presentation slides | Sarrah | In progress | |
 | 9 | Research the classical methods currently in our Drive | Nurbu | To do | Nov 15 |
-| | Presentation: "Engineering constraints and decisions" slide, covering the preprocessing, the constraints we ran into in Colab and research, and the workarounds | Chidera | | |
+| | Presentation: "Engineering constraints and decisions" slide, covering the preprocessing, the constraints we ran into in Colab and research, and the workarounds | Nina, Chidera | | |
 
 Chidera writes up each meeting and posts it in [`progressReport/`](progressReport/) (and as GitHub issues so everyone can check them off). Here's how the plan changed week to week:
 
