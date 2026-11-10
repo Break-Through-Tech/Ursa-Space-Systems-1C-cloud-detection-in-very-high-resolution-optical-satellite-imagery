@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Detection & Preprocessing | Break Through Tech AI</title>
+  <style>
+    :root {
+      --primary: #c90000; /* NJIT Crimson */
+      --primary-hover: #a30000;
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --green: #2ea043;
+      --yellow: #d29922;
+      --blue: #58a6ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Header */
+    header {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .badge {
+      align-self: flex-start;
+      background: rgba(201, 0, 0, 0.15);
+      color: #ff7b72;
+      border: 1px solid rgba(201, 0, 0, 0.4);
+      padding: 3px 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Backend Config Banner */
+    .backend-config {
+      background: #1c2128;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 12px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.88rem;
+    }
+
+    .backend-config label {
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .backend-config input {
+      flex: 1;
+      min-width: 260px;
+      background: #0d1117;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-family: monospace;
+    }
+
+    .backend-config input:focus {
+      outline: none;
+      border-color: var(--blue);
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #8b949e;
+    }
+
+    .dot.connected { background: var(--green); }
+    .dot.error { background: #f85149; }
+
+    /* App Grid */
+    .app-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .app-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #fff;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+
+    /* File Upload Box */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #11151c;
+      position: relative;
+    }
+
+    .upload-zone:hover {
+      border-color: var(--blue);
+      background: rgba(88, 166, 255, 0.05);
+    }
+
+    .upload-zone input[type="file"] {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .upload-icon {
+      font-size: 2rem;
+      margin-bottom: 6px;
+    }
+
+    .upload-text {
+      font-size: 0.92rem;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .upload-subtext {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .preview-box {
+      display: none;
+      width: 100%;
+      max-height: 220px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-top: 8px;
+    }
+
+    /* Sliders */
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+      font-weight: 500;
+    }
+
+    .control-val {
+      color: var(--blue);
+      font-family: monospace;
+      font-weight: 600;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #21262d;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      background: var(--primary-hover);
+    }
+
+    /* Submit Button */
+    .btn-submit {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s;
+      margin-top: 4px;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .spinner {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Metrics Bar */
+    .metrics-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .metric-card {
+      background: #11151c;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      text-align: center;
+    }
+
+    .metric-label {
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .metric-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .metric-card.sam .metric-value { color: #3fb950; }
+    .metric-card.omni .metric-value { color: #f85149; }
+    .metric-card.consensus .metric-value { color: #e3b341; }
+
+    /* Results Tabs */
+    .tabs-header {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      background: #21262d;
+    }
+
+    .tab-btn.active {
+      color: #fff;
+      background: #21262d;
+      border-color: var(--border);
+    }
+
+    .result-display {
+      width: 100%;
+      min-height: 380px;
+      background: #0b0f19;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .result-img {
+      width: 100%;
+      height: auto;
+      max-height: 480px;
+      object-fit: contain;
+      display: none;
+    }
+
+    .placeholder-msg {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      text-align: center;
+      padding: 24px;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      padding: 12px 0 24px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <span class="badge">Break Through Tech AI &bull; Ursa Space Systems</span>
+    <h1>⛈️ Cloud Detection & Preprocessing Ensemble</h1>
+    <p class="subtitle">
+      Satellite imagery preprocessing with Segment Anything Model (SAM) prompt inference & OmniCloudMask consensus.
+    </p>
+  </header>
+
+  <!-- Backend API URL Config -->
+  <div class="backend-config">
+    <label for="backendUrl">Backend API Endpoint:</label>
+    <input type="text" id="backendUrl" value="http://localhost:8000" placeholder="e.g. https://xxxx.trycloudflare.com or http://localhost:8000">
+    <div class="status-indicator">
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">Testing connection...</span>
+    </div>
+  </div>
+
+  <!-- App Body Grid -->
+  <div class="app-grid">
+
+    <!-- Controls Column -->
+    <div class="card">
+      <h2 class="card-title">1. Image & Parameters</h2>
+
+      <!-- Upload Zone -->
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="imageInput" accept="image/png, image/jpeg, image/jpg, image/tiff, image/bmp">
+        <div class="upload-icon">🛰️</div>
+        <div class="upload-text" id="uploadPromptText">Click or drag satellite imagery here</div>
+        <div class="upload-subtext">Supports PNG, JPG, JPEG, TIFF</div>
+      </div>
+      <img id="imagePreview" class="preview-box" alt="Input Preview">
+
+      <!-- Brightness Slider -->
+      <div class="control-group">
+        <div class="control-header">
+          <span>Brightness Offset</span>
+          <span class="control-val" id="brightnessVal">-100</span>
+        </div>
+        <input type="range" id="brightnessSlider" min="-150" max="150" step="10" value="-100">
+      </div>
+
+      <!-- Contrast Slider -->
+      <div class="control-group">
+        <div class="control-header">
+          <span>Contrast Multiplier</span>
+          <span class="control-val" id="contrastVal">1.5</span>
+        </div>
+        <input type="range" id="contrastSlider" min="0.5" max="3.0" step="0.1" value="1.5">
+      </div>
+
+      <!-- Whiteness Threshold Slider -->
+      <div class="control-group">
+        <div class="control-header">
+          <span>Whiteness Prompt Threshold</span>
+          <span class="control-val" id="thresholdVal">175</span>
+        </div>
+        <input type="range" id="thresholdSlider" min="100" max="250" step="5" value="175">
+      </div>
+
+      <!-- Submit Button -->
+      <button class="btn-submit" id="submitBtn">
+        <div class="spinner" id="spinner"></div>
+        <span id="btnText">Segment Clouds</span>
+      </button>
+    </div>
+
+    <!-- Output Column -->
+    <div class="card">
+      <h2 class="card-title">2. Segmentation Overlays & Metrics</h2>
+
+      <!-- Metrics Bar -->
+      <div class="metrics-container">
+        <div class="metric-card consensus">
+          <div class="metric-label">Consensus</div>
+          <div class="metric-value" id="consensusMetric">--%</div>
+        </div>
+        <div class="metric-card sam">
+          <div class="metric-label">SAM Mask</div>
+          <div class="metric-value" id="samMetric">--%</div>
+        </div>
+        <div class="metric-card omni">
+          <div class="metric-label">OmniCloudMask</div>
+          <div class="metric-value" id="omniMetric">--%</div>
+        </div>
+      </div>
+
+      <!-- Results Tab Bar -->
+      <div class="tabs-header">
+        <button class="tab-btn active" data-tab="consensus">Consensus (Yellow)</button>
+        <button class="tab-btn" data-tab="sam">SAM (Green)</button>
+        <button class="tab-btn" data-tab="omni">OmniCloud (Red)</button>
+      </div>
+
+      <!-- Image Display Area -->
+      <div class="result-display">
+        <div class="placeholder-msg" id="placeholderMsg">
+          Upload an image and click <strong>Segment Clouds</strong> to see results.
+        </div>
+        <img id="resConsensus" class="result-img" alt="Consensus Overlay">
+        <img id="resSam" class="result-img" alt="SAM Overlay">
+        <img id="resOmni" class="result-img" alt="OmniCloudMask Overlay">
+      </div>
+
+    </div>
+
+  </div>
+
+  <footer>
+    <p>New Jersey Institute of Technology &bull; Department of Computer Science &bull; Hosted on Highlander AFS</p>
+  </footer>
+
+</div>
+
+<script>
+  // DOM Elements
+  const backendInput = document.getElementById('backendUrl');
+  const statusDot = document.getElementById('statusDot');
+  const statusText = document.getElementById('statusText');
+  const imageInput = document.getElementById('imageInput');
+  const imagePreview = document.getElementById('imagePreview');
+  const uploadPromptText = document.getElementById('uploadPromptText');
+
+  const brightnessSlider = document.getElementById('brightnessSlider');
+  const brightnessVal = document.getElementById('brightnessVal');
+  const contrastSlider = document.getElementById('contrastSlider');
+  const contrastVal = document.getElementById('contrastVal');
+  const thresholdSlider = document.getElementById('thresholdSlider');
+  const thresholdVal = document.getElementById('thresholdVal');
+
+  const submitBtn = document.getElementById('submitBtn');
+  const spinner = document.getElementById('spinner');
+  const btnText = document.getElementById('btnText');
+
+  const consensusMetric = document.getElementById('consensusMetric');
+  const samMetric = document.getElementById('samMetric');
+  const omniMetric = document.getElementById('omniMetric');
+
+  const placeholderMsg = document.getElementById('placeholderMsg');
+  const resConsensus = document.getElementById('resConsensus');
+  const resSam = document.getElementById('resSam');
+  const resOmni = document.getElementById('resOmni');
+  const tabBtns = document.querySelectorAll('.tab-btn');
+
+  let currentTab = 'consensus';
+  let activeImages = { consensus: '', sam: '', omni: '' };
+
+  // Restore saved backend URL from localStorage if available
+  const savedUrl = localStorage.getItem('cloud_backend_url');
+  if (savedUrl) {
+    backendInput.value = savedUrl;
+  }
+
+  // Live Slider Updates
+  brightnessSlider.addEventListener('input', (e) => brightnessVal.textContent = e.target.value);
+  contrastSlider.addEventListener('input', (e) => contrastVal.textContent = parseFloat(e.target.value).toFixed(1));
+  thresholdSlider.addEventListener('input', (e) => thresholdVal.textContent = e.target.value);
+
+  // Backend Health Ping
+  async function checkBackend() {
+    const url = backendInput.value.trim().replace(/\/+$/, '');
+    localStorage.setItem('cloud_backend_url', url);
+    statusDot.className = 'dot';
+    statusText.textContent = 'Connecting...';
+
+    try {
+      const resp = await fetch(url + '/', { method: 'GET' });
+      if (resp.ok) {
+        statusDot.className = 'dot connected';
+        statusText.textContent = 'Backend online';
+      } else {
+        throw new Error('HTTP ' + resp.status);
+      }
+    } catch (err) {
+      statusDot.className = 'dot error';
+      statusText.textContent = 'Cannot reach backend (Check URL or start server)';
+    }
+  }
+
+  backendInput.addEventListener('change', checkBackend);
+  checkBackend();
+
+  // File Upload Preview
+  imageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      uploadPromptText.textContent = file.name;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        imagePreview.src = ev.target.result;
+        imagePreview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Tab Switching
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTab = btn.getAttribute('data-tab');
+      renderActiveTab();
+    });
+  });
+
+  function renderActiveTab() {
+    resConsensus.style.display = 'none';
+    resSam.style.display = 'none';
+    resOmni.style.display = 'none';
+
+    if (!activeImages[currentTab]) {
+      placeholderMsg.style.display = 'block';
+      return;
+    }
+
+    placeholderMsg.style.display = 'none';
+    if (currentTab === 'consensus') resConsensus.style.display = 'block';
+    if (currentTab === 'sam') resSam.style.display = 'block';
+    if (currentTab === 'omni') resOmni.style.display = 'block';
+  }
+
+  // Predict Request
+  submitBtn.addEventListener('click', async () => {
+    const file = imageInput.files[0];
+    if (!file) {
+      alert('Please select or upload a satellite image first.');
+      return;
+    }
+
+    const backendUrl = backendInput.value.trim().replace(/\/+$/, '');
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('brightness', brightnessSlider.value);
+    formData.append('contrast', contrastSlider.value);
+    formData.append('whiteness_threshold', thresholdSlider.value);
+
+    // UI Loading state
+    submitBtn.disabled = true;
+    spinner.style.display = 'inline-block';
+    btnText.textContent = 'Segmenting Clouds...';
+
+    try {
+      const response = await fetch(`${backendUrl}/predict`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server returned HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.error) {
+        alert('Backend Error: ' + data.error);
+        return;
+      }
+
+      // Update Metrics
+      consensusMetric.textContent = `${data.metrics.consensus_coverage}%`;
+      samMetric.textContent = `${data.metrics.sam_coverage}%`;
+      omniMetric.textContent = `${data.metrics.omni_coverage}%`;
+
+      // Update Image Sources
+      activeImages.consensus = data.images.consensus;
+      activeImages.sam = data.images.sam;
+      activeImages.omni = data.images.omni;
+
+      resConsensus.src = data.images.consensus;
+      resSam.src = data.images.sam;
+      resOmni.src = data.images.omni;
+
+      renderActiveTab();
+
+    } catch (err) {
+      alert(`Prediction failed: ${err.message}\nMake sure your backend server is running and the Backend API URL is set correctly.`);
+    } finally {
+      submitBtn.disabled = false;
+      spinner.style.display = 'none';
+      btnText.textContent = 'Segment Clouds';
+    }
+  });
+</script>
+
+</body>
+</html>
