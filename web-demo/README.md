@@ -75,6 +75,7 @@ To allow teammates or mentors to test from their own phones or computers without
 1. Run `py server.py` in your first terminal.
 2. In a second terminal, run: `cloudflared tunnel --url http://localhost:8000`
 3. Copy the output URL (`https://xxxx.trycloudflare.com`) and paste it into the **Backend API Endpoint** box on the website.
+Current live URL: `https://layers-terminals-hardwood-now.trycloudflare.com`
 
 ---
 
