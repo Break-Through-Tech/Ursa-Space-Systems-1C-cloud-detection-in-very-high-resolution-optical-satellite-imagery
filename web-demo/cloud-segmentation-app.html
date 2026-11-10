@@ -15,14 +15,11 @@
       --text-muted: #8b949e;
       --green: #2ea043;
       --yellow: #d29922;
+      --red: #f85149;
       --blue: #58a6ff;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -49,14 +46,20 @@
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 20px 28px;
+      padding: 22px 28px;
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
 
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
     .badge {
-      align-self: flex-start;
       background: rgba(201, 0, 0, 0.15);
       color: #ff7b72;
       border: 1px solid rgba(201, 0, 0, 0.4);
@@ -68,6 +71,12 @@
       text-transform: uppercase;
     }
 
+    .badge-blue {
+      background: rgba(88, 166, 255, 0.15);
+      color: #79c0ff;
+      border: 1px solid rgba(88, 166, 255, 0.4);
+    }
+
     h1 {
       font-size: 1.75rem;
       font-weight: 700;
@@ -77,6 +86,39 @@
     p.subtitle {
       color: var(--text-muted);
       font-size: 0.95rem;
+    }
+
+    /* Navigation Mode Switcher */
+    .mode-switcher {
+      display: flex;
+      background: #11151c;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .mode-btn.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(201, 0, 0, 0.3);
     }
 
     /* Backend Config Banner */
@@ -92,12 +134,6 @@
       font-size: 0.88rem;
     }
 
-    .backend-config label {
-      font-weight: 600;
-      color: var(--text);
-      white-space: nowrap;
-    }
-
     .backend-config input {
       flex: 1;
       min-width: 260px;
@@ -110,11 +146,6 @@
       font-family: monospace;
     }
 
-    .backend-config input:focus {
-      outline: none;
-      border-color: var(--blue);
-    }
-
     .status-indicator {
       display: flex;
       align-items: center;
@@ -124,26 +155,20 @@
     }
 
     .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #8b949e;
+      width: 8px; height: 8px; border-radius: 50%; background: #8b949e;
     }
-
     .dot.connected { background: var(--green); }
-    .dot.error { background: #f85149; }
+    .dot.error { background: var(--red); }
 
     /* App Grid */
     .app-grid {
       display: grid;
-      grid-template-columns: 1fr 1.2fr;
+      grid-template-columns: 1fr 1.25fr;
       gap: 20px;
     }
 
     @media (max-width: 900px) {
-      .app-grid {
-        grid-template-columns: 1fr;
-      }
+      .app-grid { grid-template-columns: 1fr; }
     }
 
     .card {
@@ -162,6 +187,61 @@
       color: #fff;
       border-bottom: 1px solid var(--border);
       padding-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Sample Selector Grid */
+    .sample-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sample-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #11151c;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .sample-item:hover {
+      border-color: var(--blue);
+      background: rgba(88, 166, 255, 0.05);
+    }
+
+    .sample-item.active {
+      border-color: var(--primary);
+      background: rgba(201, 0, 0, 0.1);
+    }
+
+    .sample-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+    }
+
+    .sample-info {
+      flex: 1;
+    }
+
+    .sample-name {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .sample-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
     }
 
     /* File Upload Box */
@@ -171,237 +251,79 @@
       padding: 24px 16px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.2s ease;
       background: #11151c;
       position: relative;
     }
 
-    .upload-zone:hover {
-      border-color: var(--blue);
-      background: rgba(88, 166, 255, 0.05);
-    }
+    .upload-zone:hover { border-color: var(--blue); }
 
     .upload-zone input[type="file"] {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      opacity: 0;
-      cursor: pointer;
-    }
-
-    .upload-icon {
-      font-size: 2rem;
-      margin-bottom: 6px;
-    }
-
-    .upload-text {
-      font-size: 0.92rem;
-      color: var(--text);
-      font-weight: 500;
-    }
-
-    .upload-subtext {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      margin-top: 4px;
+      position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer;
     }
 
     .preview-box {
-      display: none;
-      width: 100%;
-      max-height: 220px;
-      object-fit: contain;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      margin-top: 8px;
+      display: none; width: 100%; max-height: 220px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border); margin-top: 8px;
     }
 
     /* Sliders */
-    .control-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .control-header {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.88rem;
-      font-weight: 500;
-    }
-
-    .control-val {
-      color: var(--blue);
-      font-family: monospace;
-      font-weight: 600;
-    }
+    .control-group { display: flex; flex-direction: column; gap: 6px; }
+    .control-header { display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 500; }
+    .control-val { color: var(--blue); font-family: monospace; font-weight: 600; }
 
     input[type="range"] {
-      -webkit-appearance: none;
-      width: 100%;
-      height: 6px;
-      background: #21262d;
-      border-radius: 3px;
-      outline: none;
+      -webkit-appearance: none; width: 100%; height: 6px; background: #21262d; border-radius: 3px; outline: none;
     }
 
     input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--primary);
-      cursor: pointer;
-      transition: background 0.2s;
+      -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--primary); cursor: pointer;
     }
 
-    input[type="range"]::-webkit-slider-thumb:hover {
-      background: var(--primary-hover);
-    }
-
-    /* Submit Button */
     .btn-submit {
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 20px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: background 0.2s;
-      margin-top: 4px;
+      background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 12px 20px; font-size: 1rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
     }
-
-    .btn-submit:hover:not(:disabled) {
-      background: var(--primary-hover);
-    }
-
-    .btn-submit:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+    .btn-submit:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
     .spinner {
-      display: none;
-      width: 18px;
-      height: 18px;
-      border: 3px solid rgba(255,255,255,0.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      display: none; width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite;
     }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     /* Metrics Bar */
     .metrics-container {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
     }
 
     .metric-card {
-      background: #11151c;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 14px;
-      text-align: center;
+      background: #11151c; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; text-align: center;
     }
 
     .metric-label {
-      font-size: 0.76rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-      font-weight: 600;
-      margin-bottom: 4px;
+      font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px;
     }
 
-    .metric-value {
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: #fff;
-    }
-
+    .metric-value { font-size: 1.35rem; font-weight: 700; color: #fff; }
     .metric-card.sam .metric-value { color: #3fb950; }
-    .metric-card.omni .metric-value { color: #f85149; }
+    .metric-card.omni .metric-value { color: var(--red); }
     .metric-card.consensus .metric-value { color: #e3b341; }
 
     /* Results Tabs */
-    .tabs-header {
-      display: flex;
-      gap: 8px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 8px;
-    }
-
+    .tabs-header { display: flex; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
     .tab-btn {
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--text-muted);
-      padding: 6px 14px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s ease;
+      background: transparent; border: 1px solid transparent; color: var(--text-muted); padding: 6px 14px; font-size: 0.88rem; font-weight: 600; border-radius: 6px; cursor: pointer;
     }
-
-    .tab-btn:hover {
-      color: var(--text);
-      background: #21262d;
-    }
-
-    .tab-btn.active {
-      color: #fff;
-      background: #21262d;
-      border-color: var(--border);
-    }
+    .tab-btn:hover { color: var(--text); background: #21262d; }
+    .tab-btn.active { color: #fff; background: #21262d; border-color: var(--border); }
 
     .result-display {
-      width: 100%;
-      min-height: 380px;
-      background: #0b0f19;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      position: relative;
+      width: 100%; min-height: 400px; background: #0b0f19; border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;
     }
 
     .result-img {
-      width: 100%;
-      height: auto;
-      max-height: 480px;
-      object-fit: contain;
-      display: none;
+      width: 100%; height: auto; max-height: 480px; object-fit: contain;
     }
 
-    .placeholder-msg {
-      color: var(--text-muted);
-      font-size: 0.92rem;
-      text-align: center;
-      padding: 24px;
-    }
-
-    /* Footer */
-    footer {
-      text-align: center;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      padding: 12px 0 24px;
-    }
+    footer { text-align: center; font-size: 0.82rem; color: var(--text-muted); padding: 12px 0 24px; }
   </style>
 </head>
 <body>
@@ -410,81 +332,100 @@
 
   <!-- Header -->
   <header>
-    <span class="badge">Break Through Tech AI &bull; Ursa Space Systems</span>
+    <div class="badge-row">
+      <span class="badge">Break Through Tech AI &bull; Ursa Space Systems</span>
+      <span class="badge badge-blue">Interactive Portfolio Demo</span>
+    </div>
     <h1>⛈️ Cloud Detection & Preprocessing Ensemble</h1>
     <p class="subtitle">
-      Satellite imagery preprocessing with Segment Anything Model (SAM) prompt inference & OmniCloudMask consensus.
+      Satellite imagery preprocessing, Meta Segment Anything Model (SAM) prompt inference, and OmniCloudMask consensus.
     </p>
   </header>
 
-  <!-- Backend API URL Config -->
-  <div class="backend-config">
+  <!-- Navigation Mode Switcher -->
+  <div class="mode-switcher">
+    <button class="mode-btn active" id="btnModePrecomputed">
+      ⚡ Instant Showcase (24/7 Always Ready)
+    </button>
+    <button class="mode-btn" id="btnModeLive">
+      🔬 Live Interactive Testing (Custom Uploads)
+    </button>
+  </div>
+
+  <!-- Live Backend URL Banner (Shown in Live Mode) -->
+  <div class="backend-config" id="liveConfigBanner" style="display: none;">
     <label for="backendUrl">Backend API Endpoint:</label>
-    <input type="text" id="backendUrl" value="http://localhost:8000" placeholder="e.g. https://xxxx.trycloudflare.com or http://localhost:8000">
+    <input type="text" id="backendUrl" value="http://localhost:8000" placeholder="e.g. https://xxxx.trycloudflare.com">
     <div class="status-indicator">
       <span class="dot" id="statusDot"></span>
-      <span id="statusText">Testing connection...</span>
+      <span id="statusText">Connecting...</span>
     </div>
   </div>
 
-  <!-- App Body Grid -->
+  <!-- Main Grid -->
   <div class="app-grid">
 
-    <!-- Controls Column -->
-    <div class="card">
-      <h2 class="card-title">1. Image & Parameters</h2>
-
-      <!-- Upload Zone -->
-      <div class="upload-zone" id="uploadZone">
-        <input type="file" id="imageInput" accept="image/png, image/jpeg, image/jpg, image/tiff, image/bmp">
-        <div class="upload-icon">🛰️</div>
-        <div class="upload-text" id="uploadPromptText">Click or drag satellite imagery here</div>
-        <div class="upload-subtext">Supports PNG, JPG, JPEG, TIFF</div>
-      </div>
-      <img id="imagePreview" class="preview-box" alt="Input Preview">
-
-      <!-- Brightness Slider -->
-      <div class="control-group">
-        <div class="control-header">
-          <span>Brightness Offset</span>
-          <span class="control-val" id="brightnessVal">-100</span>
+    <!-- Left Column: Controls (Switches between Precomputed & Live) -->
+    <div class="card" id="cardControls">
+      
+      <!-- Precomputed Selector Panel -->
+      <div id="panelPrecomputed">
+        <h2 class="card-title">Select Satellite Sample</h2>
+        <div class="sample-list" id="sampleListContainer">
+          <!-- Sample items populated by JS -->
         </div>
-        <input type="range" id="brightnessSlider" min="-150" max="150" step="10" value="-100">
       </div>
 
-      <!-- Contrast Slider -->
-      <div class="control-group">
-        <div class="control-header">
-          <span>Contrast Multiplier</span>
-          <span class="control-val" id="contrastVal">1.5</span>
+      <!-- Live Custom Upload Panel -->
+      <div id="panelLive" style="display: none;">
+        <h2 class="card-title">Upload Custom Satellite Tile</h2>
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="imageInput" accept="image/*">
+          <div style="font-size: 2rem;">🛰️</div>
+          <div id="uploadPromptText" style="font-weight: 500;">Click or drag satellite imagery here</div>
         </div>
-        <input type="range" id="contrastSlider" min="0.5" max="3.0" step="0.1" value="1.5">
-      </div>
+        <img id="imagePreview" class="preview-box" alt="Input Preview">
 
-      <!-- Whiteness Threshold Slider -->
-      <div class="control-group">
-        <div class="control-header">
-          <span>Whiteness Prompt Threshold</span>
-          <span class="control-val" id="thresholdVal">175</span>
+        <div class="control-group" style="margin-top: 14px;">
+          <div class="control-header">
+            <span>Brightness Offset</span>
+            <span class="control-val" id="brightnessVal">-100</span>
+          </div>
+          <input type="range" id="brightnessSlider" min="-150" max="150" step="10" value="-100">
         </div>
-        <input type="range" id="thresholdSlider" min="100" max="250" step="5" value="175">
+
+        <div class="control-group">
+          <div class="control-header">
+            <span>Contrast Multiplier</span>
+            <span class="control-val" id="contrastVal">1.5</span>
+          </div>
+          <input type="range" id="contrastSlider" min="0.5" max="3.0" step="0.1" value="1.5">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span>Whiteness Prompt Threshold</span>
+            <span class="control-val" id="thresholdVal">175</span>
+          </div>
+          <input type="range" id="thresholdSlider" min="100" max="250" step="5" value="175">
+        </div>
+
+        <button class="btn-submit" id="submitBtn">
+          <div class="spinner" id="spinner"></div>
+          <span id="btnText">Segment Clouds</span>
+        </button>
       </div>
 
-      <!-- Submit Button -->
-      <button class="btn-submit" id="submitBtn">
-        <div class="spinner" id="spinner"></div>
-        <span id="btnText">Segment Clouds</span>
-      </button>
     </div>
 
-    <!-- Output Column -->
+    <!-- Right Column: Results & Overlays -->
     <div class="card">
-      <h2 class="card-title">2. Segmentation Overlays & Metrics</h2>
+      <h2 class="card-title">Ensemble Overlays & Cloud Coverage</h2>
 
-      <!-- Metrics Bar -->
+      <!-- Metrics Cards -->
       <div class="metrics-container">
         <div class="metric-card consensus">
-          <div class="metric-label">Consensus</div>
+          <div class="metric-label">Consensus Mask</div>
           <div class="metric-value" id="consensusMetric">--%</div>
         </div>
         <div class="metric-card sam">
@@ -497,21 +438,16 @@
         </div>
       </div>
 
-      <!-- Results Tab Bar -->
+      <!-- Result Tabs -->
       <div class="tabs-header">
         <button class="tab-btn active" data-tab="consensus">Consensus (Yellow)</button>
         <button class="tab-btn" data-tab="sam">SAM (Green)</button>
         <button class="tab-btn" data-tab="omni">OmniCloud (Red)</button>
       </div>
 
-      <!-- Image Display Area -->
+      <!-- Image Viewer -->
       <div class="result-display">
-        <div class="placeholder-msg" id="placeholderMsg">
-          Upload an image and click <strong>Segment Clouds</strong> to see results.
-        </div>
-        <img id="resConsensus" class="result-img" alt="Consensus Overlay">
-        <img id="resSam" class="result-img" alt="SAM Overlay">
-        <img id="resOmni" class="result-img" alt="OmniCloudMask Overlay">
+        <img id="mainResultImg" class="result-img" alt="Mask Overlay">
       </div>
 
     </div>
@@ -524,8 +460,134 @@
 
 </div>
 
+<!-- Load Precomputed Manifest if present -->
+<script src="samples_data.js"></script>
+
 <script>
+  // Fallback sample data in case samples_data.js hasn't been generated yet
+  const DEFAULT_SAMPLES = [
+    {
+      id: "sample_1",
+      title: "Kelowna Wildfire Smoke & Cloud Tile",
+      desc: "Very high-resolution optical satellite imagery (British Columbia)",
+      orig: "samples/sample_1_orig.jpg",
+      consensus: "samples/sample_1_consensus.png",
+      sam: "samples/sample_1_sam.png",
+      omni: "samples/sample_1_omni.png",
+      metrics: { consensus: 24.85, sam: 32.40, omni: 28.10 }
+    },
+    {
+      id: "sample_2",
+      title: "Urban Albedo & Cloud Cover Tile",
+      desc: "Challenging reflective rooftops and surface albedo features",
+      orig: "samples/sample_2_orig.jpg",
+      consensus: "samples/sample_2_consensus.png",
+      sam: "samples/sample_2_sam.png",
+      omni: "samples/sample_2_omni.png",
+      metrics: { consensus: 18.20, sam: 23.50, omni: 20.40 }
+    }
+  ];
+
+  const SAMPLES = (typeof SAMPLES_MANIFEST !== 'undefined') ? SAMPLES_MANIFEST : DEFAULT_SAMPLES;
+
   // DOM Elements
+  const btnModePrecomputed = document.getElementById('btnModePrecomputed');
+  const btnModeLive = document.getElementById('btnModeLive');
+  const panelPrecomputed = document.getElementById('panelPrecomputed');
+  const panelLive = document.getElementById('panelLive');
+  const liveConfigBanner = document.getElementById('liveConfigBanner');
+  const sampleListContainer = document.getElementById('sampleListContainer');
+
+  const mainResultImg = document.getElementById('mainResultImg');
+  const consensusMetric = document.getElementById('consensusMetric');
+  const samMetric = document.getElementById('samMetric');
+  const omniMetric = document.getElementById('omniMetric');
+  const tabBtns = document.querySelectorAll('.tab-btn');
+
+  let activeMode = 'precomputed';
+  let activeSample = SAMPLES[0] || null;
+  let activeTab = 'consensus';
+
+  let liveImages = { consensus: '', sam: '', omni: '' };
+  let liveMetrics = { consensus: '--', sam: '--', omni: '--' };
+
+  // Render Sample List
+  function initSamples() {
+    sampleListContainer.innerHTML = '';
+    SAMPLES.forEach((s, idx) => {
+      const item = document.createElement('div');
+      item.className = `sample-item ${idx === 0 ? 'active' : ''}`;
+      item.innerHTML = `
+        <div style="font-size: 1.6rem;">🛰️</div>
+        <div class="sample-info">
+          <div class="sample-name">${s.title}</div>
+          <div class="sample-sub">${s.desc || 'Optical satellite tile'} &bull; Consensus: ${s.metrics.consensus}%</div>
+        </div>
+      `;
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.sample-item').forEach(el => el.classList.remove('active'));
+        item.classList.add('active');
+        activeSample = s;
+        renderDisplay();
+      });
+      sampleListContainer.appendChild(item);
+    });
+  }
+
+  // Render Display
+  function renderDisplay() {
+    if (activeMode === 'precomputed' && activeSample) {
+      consensusMetric.textContent = `${activeSample.metrics.consensus}%`;
+      samMetric.textContent = `${activeSample.metrics.sam}%`;
+      omniMetric.textContent = `${activeSample.metrics.omni}%`;
+
+      if (activeTab === 'consensus') mainResultImg.src = activeSample.consensus;
+      else if (activeTab === 'sam') mainResultImg.src = activeSample.sam;
+      else if (activeTab === 'omni') mainResultImg.src = activeSample.omni;
+    } else if (activeMode === 'live') {
+      consensusMetric.textContent = liveMetrics.consensus;
+      samMetric.textContent = liveMetrics.sam;
+      omniMetric.textContent = liveMetrics.omni;
+
+      if (liveImages[activeTab]) {
+        mainResultImg.src = liveImages[activeTab];
+      }
+    }
+  }
+
+  // Switch Modes
+  btnModePrecomputed.addEventListener('click', () => {
+    activeMode = 'precomputed';
+    btnModePrecomputed.classList.add('active');
+    btnModeLive.classList.remove('active');
+    panelPrecomputed.style.display = 'block';
+    panelLive.style.display = 'none';
+    liveConfigBanner.style.display = 'none';
+    renderDisplay();
+  });
+
+  btnModeLive.addEventListener('click', () => {
+    activeMode = 'live';
+    btnModeLive.classList.add('active');
+    btnModePrecomputed.classList.remove('active');
+    panelPrecomputed.style.display = 'none';
+    panelLive.style.display = 'block';
+    liveConfigBanner.style.display = 'flex';
+    checkBackend();
+    renderDisplay();
+  });
+
+  // Tab Buttons
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeTab = btn.getAttribute('data-tab');
+      renderDisplay();
+    });
+  });
+
+  // Live Backend Logic
   const backendInput = document.getElementById('backendUrl');
   const statusDot = document.getElementById('statusDot');
   const statusText = document.getElementById('statusText');
@@ -544,55 +606,27 @@
   const spinner = document.getElementById('spinner');
   const btnText = document.getElementById('btnText');
 
-  const consensusMetric = document.getElementById('consensusMetric');
-  const samMetric = document.getElementById('samMetric');
-  const omniMetric = document.getElementById('omniMetric');
-
-  const placeholderMsg = document.getElementById('placeholderMsg');
-  const resConsensus = document.getElementById('resConsensus');
-  const resSam = document.getElementById('resSam');
-  const resOmni = document.getElementById('resOmni');
-  const tabBtns = document.querySelectorAll('.tab-btn');
-
-  let currentTab = 'consensus';
-  let activeImages = { consensus: '', sam: '', omni: '' };
-
-  // Restore saved backend URL from localStorage if available
-  const savedUrl = localStorage.getItem('cloud_backend_url');
-  if (savedUrl) {
-    backendInput.value = savedUrl;
-  }
-
-  // Live Slider Updates
   brightnessSlider.addEventListener('input', (e) => brightnessVal.textContent = e.target.value);
   contrastSlider.addEventListener('input', (e) => contrastVal.textContent = parseFloat(e.target.value).toFixed(1));
   thresholdSlider.addEventListener('input', (e) => thresholdVal.textContent = e.target.value);
 
-  // Backend Health Ping
   async function checkBackend() {
     const url = backendInput.value.trim().replace(/\/+$/, '');
-    localStorage.setItem('cloud_backend_url', url);
     statusDot.className = 'dot';
     statusText.textContent = 'Connecting...';
-
     try {
       const resp = await fetch(url + '/', { method: 'GET' });
       if (resp.ok) {
         statusDot.className = 'dot connected';
         statusText.textContent = 'Backend online';
-      } else {
-        throw new Error('HTTP ' + resp.status);
-      }
-    } catch (err) {
+      } else throw new Error();
+    } catch {
       statusDot.className = 'dot error';
       statusText.textContent = 'Cannot reach backend (Check URL or start server)';
     }
   }
-
   backendInput.addEventListener('change', checkBackend);
-  checkBackend();
 
-  // File Upload Preview
   imageInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -606,39 +640,9 @@
     }
   });
 
-  // Tab Switching
-  tabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      tabBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentTab = btn.getAttribute('data-tab');
-      renderActiveTab();
-    });
-  });
-
-  function renderActiveTab() {
-    resConsensus.style.display = 'none';
-    resSam.style.display = 'none';
-    resOmni.style.display = 'none';
-
-    if (!activeImages[currentTab]) {
-      placeholderMsg.style.display = 'block';
-      return;
-    }
-
-    placeholderMsg.style.display = 'none';
-    if (currentTab === 'consensus') resConsensus.style.display = 'block';
-    if (currentTab === 'sam') resSam.style.display = 'block';
-    if (currentTab === 'omni') resOmni.style.display = 'block';
-  }
-
-  // Predict Request
   submitBtn.addEventListener('click', async () => {
     const file = imageInput.files[0];
-    if (!file) {
-      alert('Please select or upload a satellite image first.');
-      return;
-    }
+    if (!file) { alert('Please choose an image first.'); return; }
 
     const backendUrl = backendInput.value.trim().replace(/\/+$/, '');
     const formData = new FormData();
@@ -647,51 +651,36 @@
     formData.append('contrast', contrastSlider.value);
     formData.append('whiteness_threshold', thresholdSlider.value);
 
-    // UI Loading state
     submitBtn.disabled = true;
     spinner.style.display = 'inline-block';
-    btnText.textContent = 'Segmenting Clouds...';
+    btnText.textContent = 'Segmenting...';
 
     try {
-      const response = await fetch(`${backendUrl}/predict`, {
-        method: 'POST',
-        body: formData
-      });
+      const resp = await fetch(`${backendUrl}/predict`, { method: 'POST', body: formData });
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const data = await resp.json();
 
-      if (!response.ok) {
-        throw new Error(`Server returned HTTP ${response.status}`);
-      }
+      liveMetrics.consensus = `${data.metrics.consensus_coverage}%`;
+      liveMetrics.sam = `${data.metrics.sam_coverage}%`;
+      liveMetrics.omni = `${data.metrics.omni_coverage}%`;
 
-      const data = await response.json();
-      if (data.error) {
-        alert('Backend Error: ' + data.error);
-        return;
-      }
+      liveImages.consensus = data.images.consensus;
+      liveImages.sam = data.images.sam;
+      liveImages.omni = data.images.omni;
 
-      // Update Metrics
-      consensusMetric.textContent = `${data.metrics.consensus_coverage}%`;
-      samMetric.textContent = `${data.metrics.sam_coverage}%`;
-      omniMetric.textContent = `${data.metrics.omni_coverage}%`;
-
-      // Update Image Sources
-      activeImages.consensus = data.images.consensus;
-      activeImages.sam = data.images.sam;
-      activeImages.omni = data.images.omni;
-
-      resConsensus.src = data.images.consensus;
-      resSam.src = data.images.sam;
-      resOmni.src = data.images.omni;
-
-      renderActiveTab();
-
+      renderDisplay();
     } catch (err) {
-      alert(`Prediction failed: ${err.message}\nMake sure your backend server is running and the Backend API URL is set correctly.`);
+      alert(`Error running prediction: ${err.message}. Make sure your backend server is running!`);
     } finally {
       submitBtn.disabled = false;
       spinner.style.display = 'none';
       btnText.textContent = 'Segment Clouds';
     }
   });
+
+  // Init
+  initSamples();
+  renderDisplay();
 </script>
 
 </body>
