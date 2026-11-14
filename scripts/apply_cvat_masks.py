@@ -3,18 +3,18 @@ Step 2 of 2: put the fixed CVAT masks back into each crop folder.
 
 After fixing the masks in CVAT, export the task with
 Actions > Export task dataset > "Segmentation mask 1.1" (no images needed).
+If prep_for_cvat.py split the crops into groups, run this once per group,
+with that group's export zip and manifest.csv.
 
 Input:
   CVAT_EXPORT.zip   the zip you exported from CVAT
-  ROOT              the same OCM folder you gave prep_for_cvat.py
+  CROPS             the folder holding the crop folders (the one with image.tif or image.png)
   MANIFEST          manifest.csv made by prep_for_cvat.py
 
 Output:
-  ROOT/<scene>/crop_XX/mask_gt.png   single-band mask, 0 = not cloud, 255 = cloud
-                                     (same 2048x2048 grid as image.tif; use mask > 0 for 0/1)
-
-ROOT can also be a local copy of the crop folders that only has image.png in each one;
-the size check then uses image.png instead of image.tif.
+  CROPS/<...>/crop_XX/mask_gt.png   single-band mask on the same 2048x2048 grid as image.tif:
+                                      0 = not cloud, 255 = cloud, 64 = smoke, 128 = unsure
+                                    For training, cloud = (mask == 255).
 
 Colab usage:
     !python apply_cvat_masks.py /content/cvat_export.zip "/content/drive/MyDrive/<your OCM folder>" /content/cvat_upload/manifest.csv
@@ -30,16 +30,30 @@ import numpy as np
 import tifffile
 from PIL import Image
 
+OUT_VALUES = {"cloud": 255, "smoke": 64, "unsure": 128}
+DEFAULT_COLORS = {"cloud": (255, 0, 0), "smoke": (255, 106, 0), "unsure": (0, 255, 60)}
 
-def cloud_color(z):
-    """Read the cloud label's color from the export's labelmap.txt (default red)."""
+
+def label_colors(z):
+    """Read each label's color from the export's labelmap.txt."""
+    colors = dict(DEFAULT_COLORS)
     try:
         for line in z.read("labelmap.txt").decode().splitlines():
-            if line.startswith("cloud:"):
-                return tuple(int(v) for v in line.split(":")[1].split(","))
+            if line and not line.startswith("#"):
+                name, color = line.split(":")[:2]
+                if name in OUT_VALUES and color:
+                    colors[name] = tuple(int(v) for v in color.split(","))
     except KeyError:
         pass
-    return (255, 0, 0)
+    return colors
+
+
+def image_size(d):
+    ref = d / "image.tif"
+    if ref.exists():
+        return tifffile.imread(ref).shape[:2]
+    w, h = Image.open(d / "image.png").size  # e.g. a local copy that only has image.png
+    return h, w
 
 
 def main():
@@ -52,7 +66,7 @@ def main():
 
     written, missing = 0, []
     with zipfile.ZipFile(export) as z:
-        color = np.array(cloud_color(z), np.uint8)
+        colors = label_colors(z)
         masks = {Path(n).stem: n for n in z.namelist()
                  if n.startswith("SegmentationClass/") and n.endswith(".png")}
 
@@ -61,16 +75,13 @@ def main():
                 missing.append(name)
                 continue
             rgb = np.array(Image.open(io.BytesIO(z.read(masks[name]))).convert("RGB"))
-            gt = np.where(np.all(rgb == color, axis=-1), 255, 0).astype(np.uint8)
+            gt = np.zeros(rgb.shape[:2], np.uint8)
+            for label, value in OUT_VALUES.items():
+                gt[np.all(rgb == np.array(colors[label], np.uint8), axis=-1)] = value
 
             for d in crop_dirs:
-                ref = d / "image.tif"
-                if ref.exists():
-                    h, w = tifffile.imread(ref).shape[:2]
-                else:  # e.g. a local copy that only has image.png
-                    w, h = Image.open(d / "image.png").size
-                if gt.shape != (h, w):
-                    print(f"SIZE MISMATCH, skipped: {d} mask {gt.shape} vs image {(h, w)}")
+                if gt.shape != tuple(image_size(d)):
+                    print(f"SIZE MISMATCH, skipped: {d} mask {gt.shape} vs image {image_size(d)}")
                     continue
                 Image.fromarray(gt).save(d / "mask_gt.png")
                 written += 1
