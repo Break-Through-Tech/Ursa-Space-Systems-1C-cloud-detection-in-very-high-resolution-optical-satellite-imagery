@@ -13,6 +13,9 @@ Output:
   ROOT/<scene>/crop_XX/mask_gt.png   single-band mask, 0 = not cloud, 255 = cloud
                                      (same 2048x2048 grid as image.tif; use mask > 0 for 0/1)
 
+ROOT can also be a local copy of the crop folders that only has image.png in each one;
+the size check then uses image.png instead of image.tif.
+
 Colab usage:
     !python apply_cvat_masks.py /content/cvat_export.zip "/content/drive/MyDrive/<your OCM folder>" /content/cvat_upload/manifest.csv
 """
@@ -61,7 +64,11 @@ def main():
             gt = np.where(np.all(rgb == color, axis=-1), 255, 0).astype(np.uint8)
 
             for d in crop_dirs:
-                h, w = tifffile.imread(d / "image.tif").shape[:2]
+                ref = d / "image.tif"
+                if ref.exists():
+                    h, w = tifffile.imread(ref).shape[:2]
+                else:  # e.g. a local copy that only has image.png
+                    w, h = Image.open(d / "image.png").size
                 if gt.shape != (h, w):
                     print(f"SIZE MISMATCH, skipped: {d} mask {gt.shape} vs image {(h, w)}")
                     continue
