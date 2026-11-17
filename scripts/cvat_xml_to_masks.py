@@ -66,6 +66,12 @@ def _corners_between(a, b, w, h):
     return [c for _, c in sorted(out)]
 
 
+def snap_to_edge(x, y, w, h):
+    x = 0.0 if x <= EDGE else (float(w) if x >= w - EDGE else x)
+    y = 0.0 if y <= EDGE else (float(h) if y >= h - EDGE else y)
+    return x, y
+
+
 def close_polyline(pts, w, h):
     """Close an open polyline that starts and ends on the image edge.
 
@@ -120,6 +126,13 @@ def shape_layer(shape, w, h):
         if tag == "polyline":
             pts = close_polyline(pts, w, h)
         d.polygon(pts, fill=1, outline=1)
+        if np.array(img).mean() >= 0.9:
+            # A shape meant to cover the whole image: snap corners drawn a few
+            # pixels off the edge onto it, so no thin unlabeled strip is left.
+            pts = [snap_to_edge(x, y, w, h) for x, y in pts]
+            img = Image.new("1", (w, h), 0)
+            d = ImageDraw.Draw(img)
+            d.polygon(pts, fill=1, outline=1)
     elif tag == "box":
         x0, y0 = float(shape.get("xtl")), float(shape.get("ytl"))
         x1, y1 = float(shape.get("xbr")), float(shape.get("ybr"))
