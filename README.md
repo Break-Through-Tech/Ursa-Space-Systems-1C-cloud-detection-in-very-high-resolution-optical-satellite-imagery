@@ -33,7 +33,10 @@ We use VS Code locally and Google Colab for the shared notebook.
    `cd Ursa-Space-Systems-1C-cloud-detection-in-very-high-resolution-optical-satellite-imagery`
 3. (Optional) Make a virtual environment:
    `python -m venv env`, then `source env/bin/activate` (Mac/Linux) or `.\env\Scripts\activate` (Windows)
-4. Open `notebooks/ursa_space_1C.ipynb` in Google Colab and run all cells. The notebook is set up for Colab and installs its own packages (rasterio, pystac, rio-tiler, segment-anything). `requirements.txt` is still empty and will be filled in when we move the code into `src/`.
+4. Install the packages for the scripts and the benchmark notebook:
+   `pip install -r requirements.txt`
+5. Open `notebooks/ursa_space_1C.ipynb` in Google Colab and run all cells. The notebook is set up for Colab and installs its own packages (rasterio, pystac, rio-tiler, segment-anything).
+6. To run `notebooks/cloud_benchmark_setup.ipynb` on your own PC, it looks for `My Drive/ursa space 1C data` through Google Drive for desktop. If your data is somewhere else, set the `URSA_PROJECT_DIR` environment variable or fill in `LOCAL_PROJECT_DIR` in the Settings cell.
 
 ## Project overview
 
@@ -97,6 +100,19 @@ There's no ground truth for this imagery, so we're making our own.
 - OCM-assisted masks (trial run). Nurbu is testing whether it works to start from OCM's masks and correct them by hand. If we trained on raw OCM output, a model would just learn to copy OCM, so the corrections are what would make these masks useful.
 - Keeping the test set independent. Scoring OCM against raw OCM masks would only tell us how much OCM agrees with itself. The test masks are checked by hand so OCM isn't graded against a lightly edited copy of its own output.
 - Still to decide: how to score `uncertain` and smoke pixels. Most likely we'll leave them out of the metrics.
+
+### OCM-assisted mask pipeline
+
+These steps turn OCM's draft masks into hand-checked `mask_gt.png` files:
+
+1. **Make the crops.** Run `notebooks/cloud_benchmark_setup.ipynb`. It sorts the images into `test`/`val`, cuts 2048×2048 crops, and saves `image.tif` and OCM's draft `mask_ocm_assisted.tif` in each crop folder under `clean_dataset/`.
+2. **Prep for CVAT.** Run `python scripts/prep_for_cvat.py <crops folder> <output folder>` (add `--groups groups.csv` to split the work into upload sets). This writes `image.png` next to each `image.tif`, plus renamed images, `cvat_masks.zip` and `manifest.csv` in the output folder.
+3. **Fix in CVAT.** Create a project with labels named exactly `cloud`, `smoke` and `unsure`. Upload the images, then load `cvat_masks.zip` through *Actions > Upload annotations > Segmentation mask 1.1*, and correct the masks.
+4. **Bring the masks back.** Export the task and run one of these (if you used `--groups`, run it once per group, with that group's export and `manifest.csv`):
+   - `python scripts/apply_cvat_masks.py <export.zip> <crops folder> <manifest.csv>` for a *Segmentation mask 1.1* export
+   - `python scripts/cvat_xml_to_masks.py <export.zip> <crops folder> <manifest.csv>` for a *CVAT for images 1.1* export. Use this one if you drew with the polyline tool, because the mask export skips polylines.
+
+Each crop folder ends up with `mask_gt.png`: `0` = not cloud, `255` = cloud, `64` = smoke, `128` = unsure. For training and scoring, cloud = `mask == 255`.
 
 ### Example mask
 

@@ -1,1 +1,18 @@
+# Install with: pip install -r requirements.txt
+# Colab already has most of these; the notebooks install anything missing themselves.
 
+# Core
+numpy
+pandas
+scipy
+Pillow
+opencv-python
+
+# Reading/writing GeoTIFFs
+rasterio
+tifffile
+imagecodecs   # lets tifffile open compressed (e.g. LZW/deflate) TIFFs
+
+# Cloud model (pulls in PyTorch). Install a CUDA build of torch first if you have a GPU.
+omnicloudmask
+torch
