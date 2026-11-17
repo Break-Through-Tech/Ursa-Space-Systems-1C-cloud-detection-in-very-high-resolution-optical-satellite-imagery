@@ -7,6 +7,8 @@ pandas
 scipy
 Pillow
 opencv-python
+scikit-image   # Otsu threshold in the benchmark notebook
+matplotlib
 
 # Reading/writing GeoTIFFs
 rasterio

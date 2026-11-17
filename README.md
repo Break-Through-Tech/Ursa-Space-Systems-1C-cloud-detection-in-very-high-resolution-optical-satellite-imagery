@@ -145,14 +145,28 @@ How OCM's classes become CVAT labels in step 2:
 
 #### Running it
 
+These steps take the crops from the setup notebook all the way to the folder layout that the benchmark notebook reads (`ursaspace1C_data/`):
+
+```
+clean_dataset/                      <- written by cloud_benchmark_setup.ipynb
+  ocm_assisted/<test|val>/<crop>/   image.tif, mask_ocm_assisted.tif
+  _ocm_predictions/<crop>.tif       OCM's untouched answer, used to score OCM
+ursaspace1C_data/                   <- read by cloud_baselines_benchmark.ipynb
+  crops/<test|val>/<crop>/          image.png, mask_gt.png
+  _ocm_predictions/<crop>.tif       copied from clean_dataset/
+  benchmark_results/                written by the benchmark
+```
+
 1. **Make the crops:** run `notebooks/cloud_benchmark_setup.ipynb` through Step 2.
-2. **Prep for CVAT:**
-   `python scripts/prep_for_cvat.py <crops folder> <output folder> [--groups groups.csv]`
-3. **Fix in CVAT:** create a project with labels named exactly `cloud`, `smoke` and `unsure`. Create a task with the images from the output folder, then load `cvat_masks.zip` through *Actions > Upload annotations > Segmentation mask 1.1*, and fix every mask by hand.
+2. **Prep for CVAT:** point `--crops` at the benchmark's `crops` folder, so `image.png` lands where the benchmark looks for it:
+   `python scripts/prep_for_cvat.py clean_dataset/ocm_assisted cvat_upload --crops ursaspace1C_data/crops [--groups groups.csv]`
+3. **Fix in CVAT:** create a project with labels named exactly `cloud`, `smoke` and `unsure`. Create a task with the images from `cvat_upload/images`, then load `cvat_upload/cvat_masks.zip` through *Actions > Upload annotations > Segmentation mask 1.1*, and fix every mask by hand.
 4. **Bring the masks back:** export the task and run one of these (if you used `--groups`, run it once per group, with that group's export and `manifest.csv`):
-   - `python scripts/apply_cvat_masks.py <export.zip> <crops folder> <manifest.csv>`
-   - `python scripts/cvat_xml_to_masks.py <export.zip|annotations.xml> <crops folder> <manifest.csv> [--preview previews/]`
-5. Mark the crop as `fixed` in `label_tracker.csv`. Only fixed crops are scored.
+   - `python scripts/apply_cvat_masks.py <export.zip> ursaspace1C_data/crops cvat_upload/manifest.csv` for a *Segmentation mask 1.1* export
+   - `python scripts/cvat_xml_to_masks.py <export.zip|annotations.xml> ursaspace1C_data/crops cvat_upload/manifest.csv [--preview previews/]` for a *CVAT for images 1.1* export
+5. **Copy OCM's predictions:** copy `clean_dataset/_ocm_predictions/` to `ursaspace1C_data/_ocm_predictions/`. Without it, the benchmark skips OCM, or you can set `OCM_MODE = "live"` to rerun OCM on a GPU instead.
+6. Mark the crop as `fixed` in `label_tracker.csv`.
+7. **Score:** run `notebooks/cloud_baselines_benchmark.ipynb` (see [Running the benchmark](#running-the-benchmark)). It uses every crop that has both `image.png` and `mask_gt.png`. Off Colab, set the `CROPS_DIR` environment variable to your `ursaspace1C_data/crops` folder.
 
 Each crop folder ends up with `mask_gt.png`, on the same grid as `image.tif`:
 
