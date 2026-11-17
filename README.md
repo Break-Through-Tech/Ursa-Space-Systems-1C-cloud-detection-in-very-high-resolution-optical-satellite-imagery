@@ -92,27 +92,72 @@ What makes this data tricky:
 
 ## Ground-truth masks
 
-There's no ground truth for this imagery, so we're making our own.
+There's no ground truth for this imagery, so we're making our own. We label in CVAT, using two different approaches.
 
-- Hand labeling in CVAT. Each tile gets labeled pixel by pixel as `clear`, `cloud` or `uncertain`. CVAT's assisted segmentation gives a first pass, then we fix it with the brush tool.
-  - Pari: validation and test tiles
-  - Chidera and Nina: training tiles
-- OCM-assisted masks (trial run). Nurbu is testing whether it works to start from OCM's masks and correct them by hand. If we trained on raw OCM output, a model would just learn to copy OCM, so the corrections are what would make these masks useful.
-- Keeping the test set independent. Scoring OCM against raw OCM masks would only tell us how much OCM agrees with itself. The test masks are checked by hand so OCM isn't graded against a lightly edited copy of its own output.
-- Still to decide: how to score `uncertain` and smoke pixels. Most likely we'll leave them out of the metrics.
+### Approach 1: Labeling by hand from scratch
 
-### OCM-assisted mask pipeline
+- Each tile is labeled pixel by pixel in CVAT as `clear`, `cloud` or `uncertain`, starting from a blank mask.
+  - **Pari:** validation and test tiles. Pari labeled entirely by hand from the start, with no model draft underneath. Because of this, those masks are fully independent of every method we're scoring.
+  - **Chidera and Nina:** training tiles.
 
-These steps turn OCM's draft masks into hand-checked `mask_gt.png` files:
+### Approach 2: OCM-assisted masks (Nurbu)
 
-1. **Make the crops.** Run `notebooks/cloud_benchmark_setup.ipynb`. It sorts the images into `test`/`val`, cuts 2048×2048 crops, and saves `image.tif` and OCM's draft `mask_ocm_assisted.tif` in each crop folder under `clean_dataset/`.
-2. **Prep for CVAT.** Run `python scripts/prep_for_cvat.py <crops folder> <output folder>` (add `--groups groups.csv` to split the work into upload sets). This writes `image.png` next to each `image.tif`, plus renamed images, `cvat_masks.zip` and `manifest.csv` in the output folder.
-3. **Fix in CVAT.** Create a project with labels named exactly `cloud`, `smoke` and `unsure`. Upload the images, then load `cvat_masks.zip` through *Actions > Upload annotations > Segmentation mask 1.1*, and correct the masks.
-4. **Bring the masks back.** Export the task and run one of these (if you used `--groups`, run it once per group, with that group's export and `manifest.csv`):
-   - `python scripts/apply_cvat_masks.py <export.zip> <crops folder> <manifest.csv>` for a *Segmentation mask 1.1* export
-   - `python scripts/cvat_xml_to_masks.py <export.zip> <crops folder> <manifest.csv>` for a *CVAT for images 1.1* export. Use this one if you drew with the polyline tool, because the mask export skips polylines.
+Nurbu takes a different route. OmniCloudMask (OCM) makes the first draft of each mask, and every draft is then corrected by hand in CVAT. Starting from a draft saves time on the easy areas, like big, obvious clouds and clear ground, so most of the effort goes into the hard parts: thin cloud edges, smoke and bright ground.
 
-Each crop folder ends up with `mask_gt.png`: `0` = not cloud, `255` = cloud, `64` = smoke, `128` = unsure. For training and scoring, cloud = `mask == 255`.
+The hand corrections are what make these masks worth having. If we trained or scored on raw OCM output, a model would just learn to copy OCM, and OCM would only be graded on how much it agrees with itself. So nothing is used until it has been checked and fixed by hand.
+
+#### Fixing masks with a drawing tablet
+
+Nurbu does the hand fixes with a **One by Wacom** pen tablet instead of a mouse. Cloud edges are soft and irregular, and the pen makes it much easier to trace them closely with CVAT's brush and polygon tools. It also helps with painting the thin gaps between clouds and cleaning up small speckles OCM leaves behind.
+
+#### The scripts, step by step
+
+The pipeline runs on a **local CVAT** (self-hosted on Nurbu's own machine instead of app.cvat.ai). This keeps the full-resolution crops and their annotations on the same machine as the data.
+
+| Step | File | What it does |
+|---|---|---|
+| 1 | `notebooks/cloud_benchmark_setup.ipynb` | Sorts the Maxar images into `test`, `val` and `set_aside` (a strip of Kelowna kept out so the same clouds don't land in both `val` and `test`). Cuts 2048×2048 crops, runs OCM on each one, and saves `image.tif` plus OCM's draft `mask_ocm_assisted.tif` in `clean_dataset/ocm_assisted/<group>/<crop>/`. Keeps a `label_tracker.csv` of every crop and whether it's been fixed. Later, it also scores OCM and the classical methods. |
+| 2 | `scripts/prep_for_cvat.py` | Gets the OCM drafts ready for CVAT. Writes a PNG copy of each crop (`image.png`), renamed copies to drag into one CVAT task, a `cvat_masks.zip` with the drafts as CVAT annotations, and a `manifest.csv` linking each upload name back to its crop folder. `--groups` splits the crops into separate upload sets (for example, by priority). |
+| 3 | CVAT (by hand) | Load the drafts and fix them with the tablet. |
+| 4a | `scripts/apply_cvat_masks.py` | Reads a *Segmentation mask 1.1* export and writes `mask_gt.png` into each crop folder. It checks the size against `image.tif` (or `image.png` if the TIFF isn't there). |
+| 4b | `scripts/cvat_xml_to_masks.py` | Does the same from a *CVAT for images 1.1* export. Use this one when shapes were drawn with the polyline tool, because CVAT's mask export skips polylines (a line has no area). It closes and fills each polyline. Full-image shapes are drawn first as the base layer and snapped to the image edges. `--preview DIR` writes side-by-side previews for spot checks. |
+
+How OCM's classes become CVAT labels in step 2:
+
+| OCM draft value | CVAT label |
+|---|---|
+| 1 thick cloud, 2 thin cloud | `cloud` (our rule: thin cloud counts as cloud) |
+| 4 smoke | `smoke` (kept separate: smoke is not cloud) |
+| 5 unsure | `unsure` |
+| 0 clear, 3 shadow | background |
+
+#### Running it
+
+1. **Make the crops:** run `notebooks/cloud_benchmark_setup.ipynb` through Step 2.
+2. **Prep for CVAT:**
+   `python scripts/prep_for_cvat.py <crops folder> <output folder> [--groups groups.csv]`
+3. **Fix in CVAT:** create a project with labels named exactly `cloud`, `smoke` and `unsure`. Create a task with the images from the output folder, then load `cvat_masks.zip` through *Actions > Upload annotations > Segmentation mask 1.1*, and fix every mask by hand.
+4. **Bring the masks back:** export the task and run one of these (if you used `--groups`, run it once per group, with that group's export and `manifest.csv`):
+   - `python scripts/apply_cvat_masks.py <export.zip> <crops folder> <manifest.csv>`
+   - `python scripts/cvat_xml_to_masks.py <export.zip|annotations.xml> <crops folder> <manifest.csv> [--preview previews/]`
+5. Mark the crop as `fixed` in `label_tracker.csv`. Only fixed crops are scored.
+
+Each crop folder ends up with `mask_gt.png`, on the same grid as `image.tif`:
+
+| Value | Meaning |
+|---|---|
+| 0 | Not cloud |
+| 255 | Cloud |
+| 64 | Smoke |
+| 128 | Unsure |
+
+For training and scoring, cloud = `mask == 255`.
+
+### Keeping the test set fair
+
+Scoring OCM against OCM-drafted masks could favor OCM, even after editing. That's why the test masks from Pari's hand-only labeling matter.
+
+Still to decide: how to score `unsure` and smoke pixels. Most likely we'll leave them out of the metrics.
 
 ### Example mask
 
