@@ -35,6 +35,18 @@ We use VS Code locally and Google Colab for the shared notebook.
    `python -m venv env`, then `source env/bin/activate` (Mac/Linux) or `.\env\Scripts\activate` (Windows)
 4. Open `notebooks/ursa_space_1C.ipynb` in Google Colab and run all cells. The notebook is set up for Colab and installs its own packages (rasterio, pystac, rio-tiler, segment-anything). `requirements.txt` is still empty and will be filled in when we move the code into `src/`.
 
+## Running the benchmark
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Break-Through-Tech/Ursa-Space-Systems-1C-cloud-detection-in-very-high-resolution-optical-satellite-imagery/blob/main/notebooks/cloud_baselines_benchmark.ipynb)
+
+`notebooks/cloud_baselines_benchmark.ipynb` scores the classical detectors (brightness + whiteness, dark-channel prior, HOT, Otsu) and OmniCloudMask against our hand-checked masks. The data isn't in this repo. It's on Google Drive in `ursaspace1C_data/crops`, and the notebook finds it on its own.
+
+**One-time setup:** in Google Drive, go to *Shared with me*, right-click `ursaspace1C_data`, then choose *Organize > Add shortcut > My Drive*.
+
+**To run:** open the notebook in Colab with the badge above, choose *Runtime > Run all*, and approve Drive access when asked.
+
+**Results** are saved to `ursaspace1C_data/benchmark_results`. If you only have view access to the shared folder, set `RESULTS_DIR = "/content/results"` in the settings cell so the results go to the Colab session instead. Files there are deleted when the session ends, so download anything you want to keep.
+
 ## Project overview
 
 This project is part of Break Through Tech's AI Studio, where student teams work on a real machine-learning problem with a host company.
