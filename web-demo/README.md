@@ -1,179 +1,156 @@
-# ⛈️ Cloud Detection & Preprocessing Ensemble — Dual-Mode Web Demo
+# Cloud Detection Benchmark: web demo
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Break%20Through%20Tech-AI%20Studio-blueviolet?style=for-the-badge" alt="Break Through Tech AI">
-  <img src="https://img.shields.io/badge/Partner-Ursa%20Space%20Systems-0052cc?style=for-the-badge" alt="Ursa Space Systems">
-  <img src="https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
-  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
-  <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" alt="PyTorch">
-  <img src="https://img.shields.io/badge/Deployment-NJIT%20Highlander%20AFS-c90000?style=for-the-badge" alt="NJIT">
-</p>
+A small website for our Break Through Tech AI Studio project with Ursa Space Systems (team 1C, Fall 2026). It explains the project, describes the cloud-detection methods we compare, and lets you flip between the original imagery, our hand-checked ground-truth masks and each model's prediction.
 
----
+The site is plain HTML, CSS and JavaScript, so the main pages need no server or install. An optional Python backend (`server.py`) adds a "Try your own image" mode that runs SAM and OmniCloudMask on an uploaded image.
 
-## 📖 Project Overview
+## Pages
 
-This repository subfolder provides an **interactive dual-mode web demonstration** and **REST inference API** for our optical satellite cloud detection pipeline developed in partnership with **Ursa Space Systems** and **Break Through Tech AI**.
+| Page | File | What's on it |
+|---|---|---|
+| Home | `cloud-segmentation-app.html` | The research question and three example crops that show where cloud detection gets hard (smoke, thin cloud, bright ground) |
+| Methods | `methods.html` | The four classical methods and OmniCloudMask, how the ground truth was made, and how the comparison is kept fair |
+| Explore crops | `explore.html` | The image viewer: pick a crop and switch between mask layers |
+| Team & credits | `about.html` | Who did what, plus data, model and people credits |
 
-The ensemble pipeline integrates **Meta's Segment Anything Model (SAM ViT-B)** with **OmniCloudMask** to perform automated point-prompt sampling across optical satellite tiles, outputting consensus cloud masks alongside quantitative cloud coverage percentages.
+The home page keeps the original file name, `cloud-segmentation-app.html`, so existing links to the demo still work.
 
-> [!NOTE]
-> **Challenge Goal:** Automated cloud detection in Very High Resolution (VHR) optical satellite imagery across challenging high-albedo terrain, wildfire smoke haze, and diverse cloud formations.
+## Run it locally
 
----
+You only need Python, which is used here as a simple file server:
 
-## 🌓 Dual-Mode Application Architecture
+    cd web-demo
+    python -m http.server 8000
 
-The application is engineered with a **progressive enhancement architecture** featuring two operational modes:
+Then open <http://localhost:8000/cloud-segmentation-app.html>.
 
-    +------------------------------------------------------------------------+
-    |                        DUAL-MODE WEB INTERFACE                         |
-    |               File: web-demo/cloud-segmentation-app.html               |
-    |               Hosted: web.njit.edu (NJIT Highlander AFS)               |
-    +-----------------------------------┬------------------------------------+
-                                        |
-             +--------------------------┴--------------------------+
-             |                                                     |
-             v                                                     v
-    +------------------------------------+   +------------------------------------+
-    |    ⚡ MODE 1: INSTANT SHOWCASE     |   |    🔬 MODE 2: LIVE TESTING API     |
-    |     (24/7 Always Online, 0 RAM)    |   |      (Custom Uploads & Sliders)    |
-    +------------------------------------+   +------------------------------------+
-    | • Zero backend dependency          |   | • Connects to FastAPI backend      |
-    | • Zero wait time / instant masks   |   | • Real-time SAM + Omni inference   |
-    | • 4 precomputed benchmark tiles    |   | • Custom brightness & contrast     |
-    | • Data: samples/ & samples_data.js |   | • Endpoint: localhost / Cloudflare |
-    +------------------------------------+   +------------------------------------+
+You can also double-click `cloud-segmentation-app.html`, but some browsers block parts of a page opened straight from disk, so the server is more reliable.
 
-1. **⚡ Mode 1: Instant Showcase (Default — Recruiter-Ready 24/7):**
-   * Operates completely client-side with zero server dependencies.
-   * Allows recruiters, mentors, and teammates to explore 4 benchmark satellite scenarios with instant mask toggling (0.01s latency) and exact precomputed coverage metrics even when the local backend is powered off.
-2. **🔬 Mode 2: Live Interactive Testing (Custom Images & Real-Time Tuning):**
-   * Upload custom satellite imagery and adjust preprocessing parameters (Brightness, Contrast, Whiteness Threshold) in real-time.
-   * Sends multipart requests to the **FastAPI (`server.py`)** engine running locally or via a secure **Cloudflare Tunnel**.
+The page fonts load from Google Fonts. Offline, the site falls back to standard system fonts and still works.
 
----
-
-## 🗂️ File Structure
+## File structure
 
     web-demo/
-    ├── cloud-segmentation-app.html   # Main dual-mode web interface
-    ├── server.py                     # FastAPI backend inference engine
-    ├── generate_samples.py           # Precomputation script to process benchmark tiles
-    ├── samples_data.js               # Manifest and precalculated metrics for tiles
-    ├── samples/                      # Benchmark satellite tiles and overlay masks
-    │   ├── sample_1_orig.jpg
-    │   ├── sample_1_consensus.png
-    │   ├── sample_1_sam.png
-    │   └── sample_1_omni.png ...
-    ├── requirements.txt              # Python package dependencies
-    └── README.md                     # Documentation
+    ├── cloud-segmentation-app.html   # Home page
+    ├── methods.html                  # Methods page
+    ├── explore.html                  # Image viewer (sample gallery + "Try your own image")
+    ├── about.html                    # Team & credits
+    ├── styles.css                    # Shared styles for all pages
+    ├── site.js                       # Shared script (fade-in on scroll)
+    ├── samples_data.js               # SAM + OCM ensemble tiles: list and cloud-cover numbers
+    ├── gt_samples_data.js            # Ground-truth crops: list and cloud-cover numbers
+    ├── generate_samples.py           # Builds the SAM + OCM ensemble tiles
+    ├── generate_gt_samples.py        # Builds the ground-truth crops
+    ├── server.py                     # Optional FastAPI backend for "Try your own image"
+    ├── requirements.txt              # Python packages for the backend
+    └── samples/
+        ├── sample_<n>_{orig,sam,omni,consensus}.*    # SAM + OCM ensemble tiles
+        ├── gt_<crop>_{orig,gt,omni}.jpg              # Ground-truth crops
+        └── hero_val_39_c1.jpg                        # Home page banner (crop val_39_c1)
 
----
+When you host the site, upload everything except the Python files.
 
-## 🛰️ Precomputed Benchmark Tiles (Mode 1)
+## The image viewer
 
-| Benchmark Tile | Location & Event | Scenario Highlight | Key Metric |
-| :--- | :--- | :--- | :---: |
-| **Tile 1** | **Kelowna Wildfire** (Aug 2023) | Subtle cumulus cloud formation amidst thin wildfire smoke haze | ~24.8% Consensus |
-| **Tile 2** | **Yellowknife Control** (Aug 2023) | Negative control over boreal forests, roads, and lakes demonstrating near-zero false alarms | ~0.0% Consensus |
-| **Tile 3** | **Kelowna Cloud Field** (Aug 2023) | Dense multi-cluster cumulus cloud field testing complex perimeter segmentation | ~45.2% Consensus |
-| **Tile 4** | **Yellowknife Wildfire** (Aug 2023) | Heavy atmospheric smoke plume challenging spectral cloud/smoke separation | ~38.6% Consensus |
+The **Explore crops** page has two sets of samples.
 
----
+### Hand-checked ground truth vs. OmniCloudMask
 
-## 🎯 Mask Overlays Explained
+Six crops whose masks were drafted with OmniCloudMask and then fixed by hand in CVAT (see the main [README](../README.md#ground-truth-masks)). They were picked to show a range of cases.
 
-* 🟨 **Consensus Mask (Yellow):** High-confidence logical intersection where **both** SAM and OmniCloudMask agree. Minimizes false positives over high-albedo terrain.
-* 🟩 **SAM Mask (Green):** Zero-shot prompt-guided segmentation from Meta's Segment Anything Model. Excels at boundary detail, cloud edges, and wispy cirrus structures.
-* 🟥 **OmniCloudMask (Red):** Specialized machine learning model trained specifically on satellite cloud feature detection.
+| Crop | What it shows | Ground truth cloud | OCM cloud |
+|---|---|---:|---:|
+| `test_03_c1` | Broken cloud over terrain | 76.2% | 92.9% |
+| `val_39_c1` | Half cloud, half ground | 51.2% | 48.8% |
+| `test_01_c1` | Wildfire smoke (89.6% smoke in the ground truth) | 0.8% | 90.4% |
+| `val_17_c1` | Cloud and smoke together (58.1% smoke) | 27.6% | 85.6% |
+| `test_05_c2` | Clear ground that OCM calls thin cloud | 0% | 100% |
+| `test_12_c1` | Clear ground | 0% | 0% |
 
----
+Layers: **Original**; **Ground truth** (cloud in blue, smoke in orange, unsure in grey); and **OmniCloudMask** (red, with thick and thin cloud merged). SAM wasn't run on these crops, so the SAM and Consensus tabs are greyed out.
 
-## ⚡ Quickstart: Local Setup
+To change which crops are shown, edit the `CHOSEN` list in `generate_gt_samples.py` and run:
 
-### 1. Clone & Navigate
-    git clone https://github.com/Break-Through-Tech/Ursa-Space-Systems-1C-cloud-detection-in-very-high-resolution-optical-satellite-imagery.git
-    cd Ursa-Space-Systems-1C-cloud-detection-in-very-high-resolution-optical-satellite-imagery/web-demo
+    python generate_gt_samples.py --crops <path to ursaspace1C_data/crops> --ocm <path to _ocm_predictions>
 
-### 2. Install Dependencies
-    pip install -r requirements.txt
+It rewrites `gt_samples_data.js` and the `samples/gt_*.jpg` images.
 
-*(On Windows using the Python Launcher: `py -m pip install -r requirements.txt`)*
+### SAM + OmniCloudMask ensemble
 
-> [!TIP]
-> **Automatic Weight Retrieval:** On first run, `server.py` automatically checks for and downloads Meta's SAM checkpoint (`sam_vit_b_01ec64.pth`, ~375 MB).
+Four tiles run through Chidera's ensemble: SAM (Segment Anything, ViT-B) is prompted from bright, white pixels, and its mask is combined with OmniCloudMask's.
 
-### 3. Launch the Backend Server (For Live Mode)
-    python server.py
+| Sample | Title on the site | SAM | OCM | Consensus |
+|---|---|---:|---:|---:|
+| `sample_1` | Tile 1: Kelowna Wildfire, Thin Haze & Edge Clouds | 12.57% | 16.96% | 10.34% |
+| `sample_2` | Tile 3: Kelowna, Dense Cumulus Cloud Field | 99.94% | 89.47% | 89.41% |
+| `sample_3` | Tile 2: Yellowknife, Clear Terrain & Water Bodies | 84.52% | 0% | 0% |
+| `sample_4` | Tile 4: Yellowknife, Heavy Overcast & Wildfire Plume | 99.28% | 95.84% | 95.14% |
 
-*(Windows: `py server.py`)*
+Layers: **Consensus** (yellow, where SAM and OCM agree), **SAM** (green) and **OmniCloudMask** (red). There are no hand-checked masks for these tiles, so the Ground truth tab is greyed out. Numbers are the share of the tile marked as cloud.
 
-Once loaded, Uvicorn will confirm the server is running on port 8000:
+To rebuild these tiles, put the source images in a `sample_inputs/` folder and run `python generate_samples.py`. It rewrites `samples_data.js` and the overlays in `samples/`.
 
-    Loading SAM model on device: cpu (or cuda)...
-    SAM model loaded successfully!
-    INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+## Optional: "Try your own image" backend
 
-### 4. Open the Web Application
-Double-click `cloud-segmentation-app.html` to open it in your browser, or visit our live NJIT hosted page:
-**https://web.njit.edu/~cwo3/breakthroughtechApp/cloud-segmentation-app.html**
+This mode sends an uploaded image to `server.py`, which runs SAM and OmniCloudMask and returns the masks. It isn't needed for any other part of the site.
 
----
+1. Install the packages (Python 3.10–3.12):
 
-## 🌐 Public Stakeholder Demos (Cloudflare Tunnel)
+        pip install -r requirements.txt
 
-To allow teammates, professors, or partners at Ursa Space Systems to test custom imagery from their own devices without installing Python:
+   On Windows with the Python launcher: `py -m pip install -r requirements.txt`.
 
-1. Start the backend in terminal 1:
-    py server.py
+2. Start the server:
 
-2. In a second terminal, open a free Cloudflare Tunnel:
-    cloudflared tunnel --url http://localhost:8000
+        python server.py
 
-> [!IMPORTANT]
-> Copy the output tunnel URL (e.g. `https://xxxx.trycloudflare.com`) and paste it into the **Backend API Endpoint** box under *Live Testing* mode. The status indicator will turn **green**, enabling live cloud segmentation over the public internet.
+   On first run it downloads the SAM checkpoint (`sam_vit_b_01ec64.pth`, about 375 MB). When it's ready it prints `Uvicorn running on http://0.0.0.0:8000`. Without a GPU, each image takes about 30 seconds.
 
----
+3. On the **Explore crops** page, choose **Try your own image**. The backend address box defaults to `http://localhost:8000`.
 
-## 🔄 Re-Generating Benchmark Samples
+### Letting others try it (Cloudflare Tunnel)
 
-To update or add new satellite tiles to the 24/7 instant showcase:
-1. Place raw satellite image tiles into a `sample_inputs/` folder.
-2. Run the precomputation script:
-    py generate_samples.py
-3. The script will re-generate `samples_data.js` and all overlay masks in `samples/`.
+To let someone use your running backend from their own device:
 
----
+1. Start `server.py` as above.
+2. In a second terminal: `cloudflared tunnel --url http://localhost:8000`
+3. Paste the `https://….trycloudflare.com` address it prints into the backend address box.
 
-## 📡 REST API Reference
+This only works while your computer and the server are running.
 
-### `POST /predict`
-Upload an image and run the live ensemble pipeline.
+### API
 
-#### Request (Multipart Form-Data)
-* `file`: Satellite image file (`.png`, `.jpg`, `.jpeg`, `.tif`)
-* `brightness`: Float (default: `-100.0`)
-* `contrast`: Float (default: `1.5`)
-* `whiteness_threshold`: Float (default: `175.0`)
+`POST /predict` takes multipart form data:
 
-#### Response (JSON)
+- `file`: the image (`.png`, `.jpg`, `.jpeg`, `.tif`)
+- `brightness`: float, default `-100.0`
+- `contrast`: float, default `1.5`
+- `whiteness_threshold`: float, default `175.0`
+
+It returns:
+
     {
       "status": "success",
-      "metrics": {
-        "sam_coverage": 32.45,
-        "omni_coverage": 28.10,
-        "consensus_coverage": 24.85
-      },
+      "metrics": { "sam_coverage": 32.45, "omni_coverage": 28.10, "consensus_coverage": 24.85 },
       "images": {
-        "consensus": "data:image/png;base64,iVBORw0KGgoAAAANSU...",
-        "sam": "data:image/png;base64,iVBORw0KGgoAAAANSU...",
-        "omni": "data:image/png;base64,iVBORw0KGgoAAAANSU..."
+        "consensus": "data:image/png;base64,...",
+        "sam": "data:image/png;base64,...",
+        "omni": "data:image/png;base64,..."
       }
     }
 
----
+## Hosting
 
-<p align="center">
-  <sub>Developed for the <strong>Break Through Tech AI Studio</strong> in collaboration with <strong>Ursa Space Systems</strong>.<br>Deployed on NJIT Highlander AFS &bull; Fall 2026</sub>
-</p>
+A live copy is on Chidera's school web space: <https://web.njit.edu/~cwo3/breakthroughtechApp/cloud-segmentation-app.html>. It may be behind this branch until the new files are uploaded there.
+
+## Known issues
+
+- On the ensemble tiles, the "Tile" numbers in the titles don't match the sample order (`sample_2` is titled Tile 3, and `sample_3` is titled Tile 2).
+- `sample_3` is described as clear terrain, but SAM marks 84.5% of it as cloud. That's a real SAM failure, but the description doesn't mention it.
+- `sample_3_omni.png` and `sample_3_consensus.png` are the same size to the byte, so they may be duplicates.
+- The ensemble tile PNGs are 4–6 MB each, which slows the page down.
+- No method scores (IoU, precision, recall, F1) are shown yet. They'll be added once the benchmark has been run.
+
+## Credits
+
+Imagery: [Maxar Open Data Program](https://radiantearth.github.io/stac-browser/#/external/maxar-opendata.s3.amazonaws.com/events/catalog.json) (CC BY-NC 4.0). Models: [OmniCloudMask](https://github.com/DPIRD-DMA/OmniCloudMask) (Wright et al., 2025, MIT license) and [Segment Anything](https://github.com/facebookresearch/segment-anything) (Meta AI, Apache 2.0). Website and SAM + OCM ensemble by Chidera Okafor; ground-truth crops, Methods page and redesign by Nurbu Lama. See the [main README](../README.md) for the full team.
