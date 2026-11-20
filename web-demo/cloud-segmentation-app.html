@@ -3,367 +3,504 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cloud Detection & Preprocessing | Break Through Tech AI</title>
+  <title>Cloud Detection Benchmark</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #c90000; /* NJIT Crimson */
-      --primary-hover: #a30000;
-      --bg: #0d1117;
-      --card-bg: #161b22;
-      --border: #30363d;
-      --text: #e6edf3;
-      --text-muted: #8b949e;
-      --green: #2ea043;
-      --yellow: #d29922;
-      --red: #f85149;
-      --blue: #58a6ff;
+      /* Sky palette */
+      --sky-1: #bcdcff;
+      --sky-2: #dcecff;
+      --sky-3: #f3f8ff;
+      --bg: #f3f7fc;
+      --card-bg: rgba(255, 255, 255, 0.86);
+      --card-solid: #ffffff;
+      --border: #dae5f2;
+      --border-strong: #c3d4e8;
+      --text: #0f2139;
+      --text-muted: #475569;
+      --primary: #1f68c4;
+      --primary-hover: #17539f;
+      --primary-soft: rgba(31, 104, 196, 0.10);
+      --sun: #f5a524;
+      --shadow-sm: 0 1px 2px rgba(18, 38, 63, 0.05), 0 2px 8px rgba(18, 38, 63, 0.04);
+      --shadow-md: 0 4px 14px rgba(18, 38, 63, 0.08), 0 12px 32px rgba(47, 127, 224, 0.08);
+      /* Mask colors (match the overlay images) */
+      --mask-gt: #2563eb;
+      --mask-consensus: #b7791f;
+      --mask-sam: #2f9e44;
+      --mask-omni: #e03131;
+      /* kept for the live-mode status dot */
+      --green: #2f9e44;
+      --red: #e03131;
+      --blue: #2f7fe0;
+      --radius: 16px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 500px at 15% -10%, var(--sky-1) 0%, transparent 60%),
+        radial-gradient(900px 420px at 95% 0%, var(--sky-2) 0%, transparent 60%),
+        linear-gradient(180deg, var(--sky-3) 0%, var(--bg) 40%);
+      background-attachment: fixed;
       color: var(--text);
-      line-height: 1.6;
-      padding: 24px 16px;
+      font-size: 16px;
+      line-height: 1.65;
+      font-feature-settings: "cv11", "ss01";
+      padding: 24px 16px 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
+
+    a { color: var(--primary); }
 
     .container {
       width: 100%;
       max-width: 1200px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 28px;
     }
 
-    /* Header */
-    header {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 22px 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    /* ---------- Hero ---------- */
+    header.hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      padding: 56px 40px 40px;
+      background: linear-gradient(155deg, #123f7d 0%, #1a56a8 48%, #2b74cf 100%);
+      color: #fff;
+      box-shadow: var(--shadow-md);
+      isolation: isolate;
     }
-
-    .badge-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
+    header.hero::after { /* soft sun glow */
+      content: ""; position: absolute; z-index: -1;
+      width: 340px; height: 340px; right: -80px; top: -120px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 226, 150, 0.55) 0%, rgba(255, 200, 100, 0.18) 40%, transparent 70%);
+      animation: glow 9s ease-in-out infinite alternate;
     }
+    @keyframes glow { from { transform: scale(1); opacity: 0.85; } to { transform: scale(1.12); opacity: 1; } }
 
+    .hero-clouds { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+    .cloud {
+      position: absolute; left: -260px;
+      width: 220px; height: 64px; border-radius: 64px;
+      background: rgba(255, 255, 255, 0.9);
+      filter: blur(2px);
+      animation: drift linear infinite;
+    }
+    .cloud::before, .cloud::after {
+      content: ""; position: absolute; background: inherit; border-radius: 50%;
+    }
+    .cloud::before { width: 96px; height: 96px; left: 34px; top: -46px; }
+    .cloud::after { width: 120px; height: 120px; left: 92px; top: -62px; }
+    .cloud.c1 { top: 86%; transform: scale(1.1); animation-duration: 60s; animation-delay: -12s; opacity: 0.18; }
+    .cloud.c2 { top: 3%; transform: scale(0.6); animation-duration: 75s; animation-delay: -40s; opacity: 0.22; }
+    .cloud.c3 { top: 98%; transform: scale(0.8); animation-duration: 90s; animation-delay: -66s; opacity: 0.2; }
+    .cloud.c4 { top: 6%; transform: scale(0.45); animation-duration: 110s; animation-delay: -20s; opacity: 0.16; }
+    @keyframes drift { from { left: -260px; } to { left: 110%; } }
+
+    .eyebrow {
+      display: inline-flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
+    }
     .badge {
-      background: rgba(201, 0, 0, 0.15);
-      color: #ff7b72;
-      border: 1px solid rgba(201, 0, 0, 0.4);
-      padding: 3px 10px;
-      font-size: 0.78rem;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      color: #fff;
+      padding: 4px 12px;
+      font-size: 0.8rem;
       font-weight: 600;
       border-radius: 999px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
+      letter-spacing: 0.2px;
+      backdrop-filter: blur(6px);
     }
-
-    .badge-blue {
-      background: rgba(88, 166, 255, 0.15);
-      color: #79c0ff;
-      border: 1px solid rgba(88, 166, 255, 0.4);
+    h1, h2, h3, .section-title, .card-title, .person-name {
+      font-family: "Plus Jakarta Sans", "Inter", -apple-system, "Segoe UI", sans-serif;
     }
-
     h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #fff;
+      font-size: clamp(2rem, 4.4vw, 3rem);
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      max-width: 780px;
+      color: #ffffff;
+      text-wrap: balance;
     }
-
     p.subtitle {
-      color: var(--text-muted);
-      font-size: 0.95rem;
+      margin-top: 14px;
+      font-size: 1.12rem;
+      line-height: 1.6;
+      max-width: 640px;
+      color: #e6f0ff;
+      text-wrap: pretty;
     }
 
-    /* Navigation Mode Switcher */
+    .page-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+    .page-nav a {
+      color: var(--text); text-decoration: none; font-size: 0.92rem; font-weight: 600;
+      padding: 9px 18px; border-radius: 999px;
+      background: #ffffff;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+    .page-nav a:hover { transform: translateY(-2px); background: #fff; box-shadow: var(--shadow-md); }
+
+    /* ---------- Sections ---------- */
+    .section { scroll-margin-top: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .section-head { display: flex; flex-direction: column; gap: 8px; }
+    .section-title { font-size: 1.85rem; line-height: 1.2; font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
+    .section-lead { color: var(--text-muted); font-size: 1.05rem; line-height: 1.65; max-width: 760px; text-wrap: pretty; }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    .info-grid .card:hover, .team-grid .card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--border-strong);
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .info-grid .card { gap: 8px; }
+    .info-grid .card h3 { font-size: 1.08rem; font-weight: 700; letter-spacing: -0.01em; color: var(--text); display: flex; align-items: center; gap: 10px; }
+    .info-grid .card p, .info-grid .card li { color: var(--text-muted); font-size: 0.94rem; line-height: 1.6; }
+    .info-grid .card ul { padding-left: 18px; }
+    .info-grid .card li { margin-bottom: 6px; }
+    .info-grid .card li::marker { color: var(--primary); }
+    .info-grid .card strong { color: var(--text); font-weight: 600; }
+    .icon {
+      width: 34px; height: 34px; border-radius: 10px; flex: none;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--primary-soft); color: var(--primary);
+    }
+    .icon svg { width: 18px; height: 18px; }
+
+    .status-note {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 12px 16px; border-radius: 12px; font-size: 0.94rem; line-height: 1.55;
+      background: #fff8e8; border: 1px solid #f6dca4; color: #6b4a0b;
+    }
+    .status-note::before {
+      content: ""; flex: none; width: 10px; height: 10px; margin-top: 6px; border-radius: 50%;
+      background: var(--sun); box-shadow: 0 0 0 0 rgba(245, 165, 36, 0.6);
+      animation: pulse 2.2s ease-out infinite;
+    }
+    @keyframes pulse { to { box-shadow: 0 0 0 10px rgba(245, 165, 36, 0); } }
+
+    /* ---------- Explore: mode switcher ---------- */
     .mode-switcher {
       display: flex;
-      background: #11151c;
+      background: rgba(255, 255, 255, 0.7);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 999px;
       padding: 4px;
       gap: 4px;
+      max-width: 520px;
+      box-shadow: var(--shadow-sm);
     }
-
     .mode-btn {
       flex: 1;
       background: transparent;
       border: none;
       color: var(--text-muted);
-      font-size: 0.95rem;
+      font: inherit;
+      font-size: 0.92rem;
       font-weight: 600;
-      padding: 10px 16px;
-      border-radius: 8px;
+      padding: 9px 16px;
+      border-radius: 999px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s;
+      transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
     }
+    .mode-btn:hover { color: var(--text); }
+    .mode-btn.active { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(31, 104, 196, 0.3); }
 
-    .mode-btn.active {
-      background: var(--primary);
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(201, 0, 0, 0.3);
-    }
-
-    /* Backend Config Banner */
     .backend-config {
-      background: #1c2128;
-      border: 1px dashed var(--border);
-      border-radius: 8px;
+      background: var(--card-bg);
+      border: 1px dashed var(--border-strong);
+      border-radius: 12px;
       padding: 12px 18px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 12px;
+      display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
       font-size: 0.88rem;
     }
-
     .backend-config input {
-      flex: 1;
-      min-width: 260px;
-      background: #0d1117;
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.88rem;
-      font-family: monospace;
+      flex: 1; min-width: 260px;
+      background: #fff; border: 1px solid var(--border); color: var(--text);
+      padding: 7px 12px; border-radius: 8px; font-size: 0.88rem; font-family: ui-monospace, monospace;
     }
-
-    .status-indicator {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-    }
-
-    .dot {
-      width: 8px; height: 8px; border-radius: 50%; background: #8b949e;
-    }
+    .status-indicator { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #9aa9bb; }
     .dot.connected { background: var(--green); }
     .dot.error { background: var(--red); }
 
-    /* App Grid */
-    .app-grid {
-      display: grid;
-      grid-template-columns: 1fr 1.25fr;
-      gap: 20px;
-    }
+    /* ---------- Explore: grid ---------- */
+    .app-grid { display: grid; grid-template-columns: minmax(300px, 0.85fr) 1.5fr; gap: 20px; align-items: start; }
+    @media (max-width: 900px) { .app-grid { grid-template-columns: 1fr; } }
 
-    @media (max-width: 900px) {
-      .app-grid { grid-template-columns: 1fr; }
-    }
-
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    .card-title {
-      font-size: 1.15rem;
-      font-weight: 600;
-      color: #fff;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    /* Sample Selector Grid */
-    .sample-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .sample-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: #11151c;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 14px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .sample-item:hover {
-      border-color: var(--blue);
-      background: rgba(88, 166, 255, 0.05);
-    }
-
-    .sample-item.active {
-      border-color: var(--primary);
-      background: rgba(201, 0, 0, 0.1);
-    }
-
-    .sample-thumb {
-      width: 48px;
-      height: 48px;
-      border-radius: 6px;
-      object-fit: cover;
-      border: 1px solid var(--border);
-    }
-
-    .sample-info {
-      flex: 1;
-    }
-
-    .sample-name {
-      font-size: 0.92rem;
-      font-weight: 600;
-      color: #fff;
-    }
-
-    .sample-sub {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
-
-    /* File Upload Box */
-    .upload-zone {
-      border: 2px dashed var(--border);
-      border-radius: 10px;
-      padding: 24px 16px;
-      text-align: center;
-      cursor: pointer;
-      background: #11151c;
-      position: relative;
-    }
-
-    .upload-zone:hover { border-color: var(--blue); }
-
-    .upload-zone input[type="file"] {
-      position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer;
-    }
-
-    .preview-box {
-      display: none; width: 100%; max-height: 220px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border); margin-top: 8px;
-    }
-
-    /* Sliders */
-    .control-group { display: flex; flex-direction: column; gap: 6px; }
-    .control-header { display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 500; }
-    .control-val { color: var(--blue); font-family: monospace; font-weight: 600; }
-
-    input[type="range"] {
-      -webkit-appearance: none; width: 100%; height: 6px; background: #21262d; border-radius: 3px; outline: none;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--primary); cursor: pointer;
-    }
-
-    .btn-submit {
-      background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 12px 20px; font-size: 1rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .btn-submit:hover:not(:disabled) { background: var(--primary-hover); }
-    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    .spinner {
-      display: none; width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Metrics Bar */
-    .metrics-container {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
-    }
-
-    .metric-card {
-      background: #11151c; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; text-align: center;
-    }
-
-    .metric-label {
-      font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px;
-    }
-
-    .metric-value { font-size: 1.35rem; font-weight: 700; color: #fff; }
-    .metric-card.sam .metric-value { color: #3fb950; }
-    .metric-card.omni .metric-value { color: var(--red); }
-    .metric-card.gt .metric-value { color: #388bfd; }
-    .metric-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+    .sample-list { display: flex; flex-direction: column; gap: 8px; max-height: 720px; overflow-y: auto; padding-right: 4px; }
     .sample-section {
-      font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);
-      font-weight: 600; margin: 6px 0 2px;
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted);
+      font-weight: 700; margin: 6px 0 2px;
     }
     .sample-section:not(:first-child) { margin-top: 14px; }
-    .tab-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-    .tab-btn:disabled:hover { background: transparent; color: var(--text-muted); }
-    .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; }
-    .legend span::before {
-      content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px;
-      margin-right: 6px; background: var(--swatch); vertical-align: -1px;
+    .sample-item {
+      display: flex; align-items: center; gap: 12px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 10px;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     }
-    .sample-note { font-size: 0.82rem; color: var(--text-muted); margin-top: 10px; line-height: 1.45; }
-    .metric-card.consensus .metric-value { color: #e3b341; }
+    .sample-item:hover { transform: translateX(3px); border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+    .sample-item.active { border-color: var(--primary); background: #f0f7ff; box-shadow: 0 0 0 3px var(--primary-soft); }
+    .sample-thumb {
+      width: 52px; height: 52px; border-radius: 9px; object-fit: cover; flex: none;
+      background: var(--sky-2); border: 1px solid var(--border);
+    }
+    .sample-info { flex: 1; min-width: 0; }
+    .sample-name { font-size: 0.93rem; font-weight: 600; color: var(--text); line-height: 1.35; }
+    .sample-sub { font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; }
 
-    /* Results Tabs */
-    .tabs-header { display: flex; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-    .tab-btn {
-      background: transparent; border: 1px solid transparent; color: var(--text-muted); padding: 6px 14px; font-size: 0.88rem; font-weight: 600; border-radius: 6px; cursor: pointer;
+    .upload-zone {
+      border: 2px dashed var(--border-strong); border-radius: 12px; padding: 24px 16px; text-align: center;
+      cursor: pointer; background: #fff; position: relative; transition: border-color 0.2s, background 0.2s;
     }
-    .tab-btn:hover { color: var(--text); background: #21262d; }
-    .tab-btn.active { color: #fff; background: #21262d; border-color: var(--border); }
+    .upload-zone:hover { border-color: var(--primary); background: #f5faff; }
+    .upload-zone input[type="file"] { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; }
+    .preview-box { display: none; width: 100%; max-height: 220px; object-fit: contain; border-radius: 10px; border: 1px solid var(--border); margin-top: 8px; }
+
+    .control-group { display: flex; flex-direction: column; gap: 6px; }
+    .control-header { display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 500; }
+    .control-val { color: var(--primary); font-family: ui-monospace, monospace; font-weight: 600; }
+    input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; background: var(--sky-2); border-radius: 3px; outline: none; }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--primary);
+      cursor: pointer; box-shadow: 0 2px 6px rgba(47, 127, 224, 0.4);
+    }
+    .btn-submit {
+      background: var(--primary); color: #fff; border: none; border-radius: 999px; padding: 12px 20px;
+      font: inherit; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .btn-submit:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    .spinner { display: none; width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.35); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Metrics */
+    .metrics-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    @media (max-width: 640px) { .metrics-container { grid-template-columns: repeat(2, 1fr); } }
+    .metric-card {
+      position: relative; overflow: hidden;
+      background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px;
+    }
+    .metric-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--c, var(--primary)); }
+    .metric-card.gt { --c: var(--mask-gt); }
+    .metric-card.consensus { --c: var(--mask-consensus); }
+    .metric-card.sam { --c: var(--mask-sam); }
+    .metric-card.omni { --c: var(--mask-omni); }
+    .metric-label { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 700; margin-bottom: 2px; }
+    .metric-value { font-size: 1.5rem; letter-spacing: -0.01em; font-weight: 800; color: var(--c, var(--text)); font-variant-numeric: tabular-nums; transition: opacity 0.3s; }
+    .metric-sub { font-size: 0.72rem; color: var(--text-muted); min-height: 1em; }
+
+    /* Layer tabs */
+    .tabs-header { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tab-btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: #fff; border: 1px solid var(--border); color: var(--text-muted);
+      padding: 6px 13px; font: inherit; font-size: 0.85rem; font-weight: 600; border-radius: 999px; cursor: pointer;
+      transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+    .tab-btn::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--c, #9aa9bb); }
+    .tab-btn[data-tab="orig"] { --c: #9aa9bb; }
+    .tab-btn[data-tab="gt"] { --c: var(--mask-gt); }
+    .tab-btn[data-tab="consensus"] { --c: var(--mask-consensus); }
+    .tab-btn[data-tab="sam"] { --c: var(--mask-sam); }
+    .tab-btn[data-tab="omni"] { --c: var(--mask-omni); }
+    .tab-btn:hover { color: var(--text); border-color: var(--border-strong); }
+    .tab-btn.active { color: var(--text); border-color: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 18%, transparent); }
+    .tab-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .tab-btn:disabled:hover { color: var(--text-muted); border-color: var(--border); }
 
     .result-display {
-      width: 100%; min-height: 400px; background: #0b0f19; border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;
+      width: 100%; aspect-ratio: 1 / 1; max-height: 640px;
+      background:
+        linear-gradient(45deg, #eef3f9 25%, transparent 25%, transparent 75%, #eef3f9 75%) 0 0 / 20px 20px,
+        linear-gradient(45deg, #eef3f9 25%, #f7fafd 25%, #f7fafd 75%, #eef3f9 75%) 10px 10px / 20px 20px;
+      border: 1px solid var(--border); border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .result-img { width: 100%; height: 100%; object-fit: contain; transition: opacity 0.35s ease; }
+    .result-img.loading { opacity: 0; }
+
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.86rem; color: var(--text-muted); }
+    .legend span::before {
+      content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px;
+      margin-right: 6px; background: var(--swatch); vertical-align: -1px;
+    }
+    .sample-note { font-size: 0.92rem; color: var(--text-muted); line-height: 1.5; }
+    .sample-note:empty { display: none; }
+
+    /* ---------- Team ---------- */
+    .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+    .person { gap: 8px; }
+    .avatar {
+      width: 44px; height: 44px; border-radius: 50%; flex: none;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.95rem; color: #fff;
+      background: linear-gradient(140deg, var(--a1, #5aa6f5), var(--a2, #a8d1fb));
+      box-shadow: 0 4px 10px rgba(47, 127, 224, 0.25);
+    }
+    .person-name { font-size: 1.02rem; font-weight: 700; color: var(--text); }
+    .person-role { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; flex: 1; }
+    .person-links { display: flex; gap: 14px; font-size: 0.84rem; }
+    a.ext { color: var(--primary); text-decoration: none; font-weight: 600; }
+    a.ext:hover { text-decoration: underline; }
+    .credits-list { padding-left: 18px; color: var(--text-muted); font-size: 0.94rem; line-height: 1.7; }
+    .credits-list strong { color: var(--text); }
+
+    /* ---------- Footer ---------- */
+    footer {
+      width: calc(100% + 32px); margin: 40px -16px 0; padding: 28px 16px 32px; text-align: center;
+      font-size: 0.88rem; line-height: 1.7; color: var(--text-muted);
+      background: linear-gradient(180deg, transparent, rgba(188, 220, 255, 0.45));
     }
 
-    .result-img {
-      width: 100%; height: auto; max-height: 480px; object-fit: contain;
+    /* ---------- Scroll reveal ---------- */
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    @media (max-width: 640px) {
+      header.hero { padding: 40px 22px 28px; border-radius: 18px; }
+      .card { padding: 18px; }
     }
 
-    footer { text-align: center; font-size: 0.82rem; color: var(--text-muted); padding: 12px 0 24px; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .reveal { opacity: 1; transform: none; }
+      html { scroll-behavior: auto; }
+    }
   </style>
 </head>
 <body>
 
 <div class="container">
 
-  <!-- Header -->
-  <header>
-    <div class="badge-row">
-      <span class="badge">Break Through Tech AI &bull; Ursa Space Systems</span>
-      <span class="badge badge-blue">Interactive Portfolio Demo</span>
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-clouds" aria-hidden="true">
+      <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div><div class="cloud c4"></div>
     </div>
-    <h1>⛈️ Cloud Detection & Preprocessing Ensemble</h1>
+    <div class="eyebrow">
+      <span class="badge">Break Through Tech AI Studio</span>
+      <span class="badge">Ursa Space Systems challenge</span>
+      <span class="badge">Fall 2026</span>
+    </div>
+    <h1>Finding clouds in <span style="white-space: nowrap;">very&#8209;high&#8209;resolution</span> satellite imagery</h1>
     <p class="subtitle">
-      Satellite imagery preprocessing, Meta Segment Anything Model (SAM) prompt inference, and OmniCloudMask consensus.
+      Classical image-processing methods vs. pretrained deep-learning models on 30&ndash;50&nbsp;cm wildfire imagery,
+      scored against cloud masks we checked by hand.
     </p>
+    <nav class="page-nav" aria-label="Page sections">
+      <a href="#overview">Overview</a>
+      <a href="#explore">Explore crops</a>
+      <a href="#team">Team &amp; credits</a>
+    </nav>
   </header>
+
+  <!-- Overview -->
+  <section class="section reveal" id="overview">
+    <div class="section-head">
+    <h2 class="section-title">Overview</h2>
+    <p class="section-lead">
+      Clouds block the ground in optical satellite imagery and throw off anything built on top of it,
+      so finding cloudy pixels is one of the first steps in almost any imagery pipeline. We compare simple,
+      rule-based cloud detectors against a pretrained deep-learning model on very-high-resolution imagery,
+      where most published methods have never been tested.
+    </p>
+    </div>
+    <div class="info-grid">
+      <div class="card">
+        <h3><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span>The problem</h3>
+        <p>Find the cloud in 30&ndash;50&nbsp;cm RGB satellite images, and show where each method gets it wrong.</p>
+        <ul>
+          <li><strong>Smoke vs. cloud:</strong> these are wildfire scenes, and smoke can look like thin cloud. Smoke should not count as cloud.</li>
+          <li><strong>Bright ground:</strong> rooftops, sand and bare ground can be as bright as cloud.</li>
+          <li><strong>Thin cloud</strong> with soft, see-through edges.</li>
+          <li><strong>Resolution:</strong> most methods were built for 10&ndash;60&nbsp;m imagery, not 30&ndash;50&nbsp;cm.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></span>The data</h3>
+        <p>
+          <a class="ext" href="https://radiantearth.github.io/stac-browser/#/external/maxar-opendata.s3.amazonaws.com/events/catalog.json" target="_blank" rel="noopener">Maxar Open Data Program</a>
+          imagery from the August 2023 Canadian wildfires (the NWT-Canada-Aug-23 event).
+        </p>
+        <ul>
+          <li>RGB cloud-optimized GeoTIFFs at about 30&ndash;50&nbsp;cm per pixel.</li>
+          <li>Kelowna and Yellowknife, three dates (Aug 8, 15 and 21), picked for heavy cloud.</li>
+          <li>Split into areas so the same ground never appears in both the tuning and test sets.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></span>The methods</h3>
+        <ul>
+          <li><strong>Classical, RGB only:</strong> brightness + whiteness, dark-channel prior, HOT haze index and Otsu thresholding. No training needed.</li>
+          <li><strong>Pretrained:</strong> <a class="ext" href="https://github.com/DPIRD-DMA/OmniCloudMask" target="_blank" rel="noopener">OmniCloudMask</a> (OCM), used as-is.</li>
+          <li><strong>Ensemble experiment:</strong> Meta's Segment Anything (SAM), prompted from bright pixels and combined with OCM.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>Ground truth and scoring</h3>
+        <p>There are no existing cloud masks for this imagery, so we labeled our own in CVAT, two ways:</p>
+        <ul>
+          <li><strong>Hand-only:</strong> labeled pixel by pixel from a blank mask.</li>
+          <li><strong>OCM-assisted:</strong> OCM's draft, then every mask fixed by hand. Smoke and unsure areas get their own labels.</li>
+        </ul>
+        <p style="margin-top: 8px;">Every method is scored on the same masks: per-pixel IoU, precision, recall and F1 for cloud vs. not cloud.</p>
+      </div>
+    </div>
+    <div class="status-note">
+      <strong>Work in progress.</strong> The scores for each method will be added once the ground-truth masks are finished and the benchmark has been run.
+    </div>
+  </section>
+
+  <section class="section reveal" id="explore">
+  <div class="section-head">
+    <h2 class="section-title">Explore crops</h2>
+    <p class="section-lead">Pick a crop, then switch layers to compare each method's mask with the original image and the hand-checked ground truth.</p>
+  </div>
 
   <!-- Navigation Mode Switcher -->
   <div class="mode-switcher">
     <button class="mode-btn active" id="btnModePrecomputed">
-      ⚡ Instant Showcase (24/7 Always Ready)
+      Sample gallery
     </button>
     <button class="mode-btn" id="btnModeLive">
-      🔬 Live Interactive Testing (Custom Uploads)
+      Try your own image
     </button>
   </div>
 
@@ -385,7 +522,7 @@
       
       <!-- Precomputed Selector Panel -->
       <div id="panelPrecomputed">
-        <h2 class="card-title">Select Satellite Sample</h2>
+        <h2 class="card-title">Choose a crop</h2>
         <div class="sample-list" id="sampleListContainer">
           <!-- Sample items populated by JS -->
         </div>
@@ -393,10 +530,10 @@
 
       <!-- Live Custom Upload Panel -->
       <div id="panelLive" style="display: none;">
-        <h2 class="card-title">Upload Custom Satellite Tile</h2>
+        <h2 class="card-title">Upload an image</h2>
         <div class="upload-zone" id="uploadZone">
           <input type="file" id="imageInput" accept="image/*">
-          <div style="font-size: 2rem;">🛰️</div>
+          
           <div id="uploadPromptText" style="font-weight: 500;">Click or drag satellite imagery here</div>
         </div>
         <img id="imagePreview" class="preview-box" alt="Input Preview">
@@ -435,7 +572,7 @@
 
     <!-- Right Column: Results & Overlays -->
     <div class="card">
-      <h2 class="card-title">Ensemble Overlays & Cloud Coverage</h2>
+      <h2 class="card-title">Mask layers and cloud cover</h2>
 
       <!-- Metrics Cards -->
       <div class="metrics-container">
@@ -482,11 +619,88 @@
 
   </div>
 
-  <footer>
-    <p>New Jersey Institute of Technology &bull; Department of Computer Science &bull; Hosted on Highlander AFS</p>
-  </footer>
+  </section>
 
+  <!-- Team & credits -->
+  <section class="section reveal" id="team">
+    <div class="section-head">
+    <h2 class="section-title">Team &amp; credits</h2>
+    <p class="section-lead">Ursa Space Systems 1C, Break Through Tech AI Studio, Fall 2026.</p>
+    </div>
+    <div class="team-grid">
+      <div class="card person">
+        <div class="avatar" style="--a1:#5aa6f5;--a2:#a8d1fb">NL</div>
+        <div class="person-name">Nurbu Lama</div>
+        <div class="person-role">Classical-method research. Built the OCM-assisted ground-truth pipeline (crop setup, CVAT scripts, hand-fixed masks) and the benchmark that scores the classical methods and OCM.</div>
+        <div class="person-links">
+          <a class="ext" href="https://github.com/nurbu" target="_blank" rel="noopener">GitHub</a>
+          <a class="ext" href="https://www.linkedin.com/in/nurbu-lama" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+      </div>
+      <div class="card person">
+        <div class="avatar" style="--a1:#7c8cf5;--a2:#b9c3fb">SA</div>
+        <div class="person-name">Sarrah Abdullahi</div>
+        <div class="person-role">Evaluation design: how the classical methods and OCM are scored against the ground truth (IoU, precision, recall, F1, cloud-cover %). Reviewed OCM and its pipeline.</div>
+        <div class="person-links">
+          <a class="ext" href="https://github.com/sab2131" target="_blank" rel="noopener">GitHub</a>
+          <a class="ext" href="https://www.linkedin.com/in/sarrah-abdullahi/" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+      </div>
+      <div class="card person">
+        <div class="avatar" style="--a1:#4cb7c9;--a2:#a6e0e8">NK</div>
+        <div class="person-name">Nina Khilnani</div>
+        <div class="person-role">Imagery loading, display and tiling notebook. Classical baselines. Training-mask labeling in CVAT. Milestone 1 task plan.</div>
+        <div class="person-links">
+          <a class="ext" href="https://github.com/ninakhilnani" target="_blank" rel="noopener">GitHub</a>
+          <a class="ext" href="https://www.linkedin.com/in/nina-kh/" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+      </div>
+      <div class="card person">
+        <div class="avatar" style="--a1:#f5a524;--a2:#fbd38d">CO</div>
+        <div class="person-name">Chidera Okafor</div>
+        <div class="person-role">Built this web demo and the SAM + OCM ensemble. Training-mask labeling in CVAT. Maintains the shared notebook and writes the weekly progress reports.</div>
+        <div class="person-links">
+          <a class="ext" href="https://github.com/ChideraOkaforNJIT" target="_blank" rel="noopener">GitHub</a>
+          <a class="ext" href="https://www.linkedin.com/in/chideraokafornjit/" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+      </div>
+      <div class="card person">
+        <div class="avatar" style="--a1:#8b7cf5;--a2:#c9c0fb">PP</div>
+        <div class="person-name">Pari Panchal</div>
+        <div class="person-role">Hand-labeled the validation and test masks in CVAT and taught the team the CVAT workflow. Classical baselines. Project brief, workplan and milestone planning.</div>
+        <div class="person-links">
+          <a class="ext" href="https://github.com/paripanchall" target="_blank" rel="noopener">GitHub</a>
+          <a class="ext" href="https://www.linkedin.com/in/pari-panchal/" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-grid" style="margin-top: 16px;">
+      <div class="card">
+        <h3><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>Thanks to</h3>
+        <ul class="credits-list">
+          <li><strong>John Savage</strong>, Challenge Advisor, <a class="ext" href="https://ursaspace.com/" target="_blank" rel="noopener">Ursa Space Systems</a></li>
+          <li><strong>Julio Contreras</strong>, AI Studio Coach</li>
+          <li>The <a class="ext" href="https://www.breakthroughtech.org/" target="_blank" rel="noopener">Break Through Tech</a> AI Studio team</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg></span>Data, models and code</h3>
+        <ul class="credits-list">
+          <li><strong>Imagery:</strong> Maxar Open Data Program, licensed CC BY-NC 4.0.</li>
+          <li><strong>OmniCloudMask:</strong> Wright et al. (2025), <em>Remote Sensing of Environment</em> 322 (MIT license).</li>
+          <li><strong>Segment Anything:</strong> Meta AI (Apache 2.0).</li>
+          <li><strong>Our code:</strong> <a class="ext" href="https://github.com/Break-Through-Tech/Ursa-Space-Systems-1C-cloud-detection-in-very-high-resolution-optical-satellite-imagery" target="_blank" rel="noopener">GitHub repository</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
 </div>
+
+<footer>
+  <p>Ursa Space Systems 1C &bull; Break Through Tech AI Studio &bull; Fall 2026</p>
+  <p>Imagery: Maxar Open Data Program (CC BY-NC 4.0)</p>
+</footer>
 
 <!-- Load Precomputed Manifest if present -->
 <script src="samples_data.js"></script>
@@ -574,7 +788,7 @@
         const item = document.createElement('div');
         item.className = `sample-item ${s === activeSample ? 'active' : ''}`;
         item.innerHTML = `
-          <div style="font-size: 1.6rem;">${isGt ? '✏️' : '🛰️'}</div>
+          <img class="sample-thumb" src="${s.orig}" alt="" loading="lazy">
           <div class="sample-info">
             <div class="sample-name">${s.title}</div>
             <div class="sample-sub">${summary}</div>
@@ -623,7 +837,7 @@
         ? `${activeSample.desc} Ground truth: OCM's draft, then fixed by hand in CVAT. Percentages are the share of the crop marked as cloud.`
         : '';
 
-      if (activeSample[activeTab]) mainResultImg.src = activeSample[activeTab];
+      if (activeSample[activeTab]) setResultImg(activeSample[activeTab]);
     } else if (activeMode === 'live') {
       gtMetric.textContent = 'n/a';
       gtSmokeMetric.textContent = '';
@@ -633,7 +847,7 @@
       omniMetric.textContent = liveMetrics.omni;
 
       const src = activeTab === 'orig' ? imagePreview.src : liveImages[activeTab];
-      if (src) mainResultImg.src = src;
+      if (src) setResultImg(src);
     }
   }
 
@@ -760,7 +974,33 @@
     }
   });
 
+  // Fade the main image out, swap it, and fade back in once the new one has loaded
+  function setResultImg(src) {
+    const abs = new URL(src, location.href).href;
+    if (mainResultImg.src === abs) return;
+    mainResultImg.classList.add('loading');
+    const img = new Image();
+    img.onload = img.onerror = () => {
+      setTimeout(() => {
+        mainResultImg.src = src;
+        mainResultImg.classList.remove('loading');
+      }, 150);
+    };
+    img.src = src;
+  }
+
+  // Reveal sections as they scroll into view
+  function initReveal() {
+    const els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('visible')); return; }
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+    }, { threshold: 0.08 });
+    els.forEach(e => io.observe(e));
+  }
+
   // Init
+  initReveal();
   initSamples();
   renderDisplay();
 </script>
