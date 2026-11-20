@@ -305,6 +305,21 @@
     .metric-value { font-size: 1.35rem; font-weight: 700; color: #fff; }
     .metric-card.sam .metric-value { color: #3fb950; }
     .metric-card.omni .metric-value { color: var(--red); }
+    .metric-card.gt .metric-value { color: #388bfd; }
+    .metric-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+    .sample-section {
+      font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);
+      font-weight: 600; margin: 6px 0 2px;
+    }
+    .sample-section:not(:first-child) { margin-top: 14px; }
+    .tab-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .tab-btn:disabled:hover { background: transparent; color: var(--text-muted); }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; }
+    .legend span::before {
+      content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px;
+      margin-right: 6px; background: var(--swatch); vertical-align: -1px;
+    }
+    .sample-note { font-size: 0.82rem; color: var(--text-muted); margin-top: 10px; line-height: 1.45; }
     .metric-card.consensus .metric-value { color: #e3b341; }
 
     /* Results Tabs */
@@ -424,6 +439,11 @@
 
       <!-- Metrics Cards -->
       <div class="metrics-container">
+        <div class="metric-card gt">
+          <div class="metric-label">Ground Truth</div>
+          <div class="metric-value" id="gtMetric">--%</div>
+          <div class="metric-sub" id="gtSmokeMetric"></div>
+        </div>
         <div class="metric-card consensus">
           <div class="metric-label">Consensus Mask</div>
           <div class="metric-value" id="consensusMetric">--%</div>
@@ -440,6 +460,8 @@
 
       <!-- Result Tabs -->
       <div class="tabs-header">
+        <button class="tab-btn" data-tab="orig">Original</button>
+        <button class="tab-btn" data-tab="gt">Ground Truth (Blue)</button>
         <button class="tab-btn active" data-tab="consensus">Consensus (Yellow)</button>
         <button class="tab-btn" data-tab="sam">SAM (Green)</button>
         <button class="tab-btn" data-tab="omni">OmniCloud (Red)</button>
@@ -449,6 +471,12 @@
       <div class="result-display">
         <img id="mainResultImg" class="result-img" alt="Mask Overlay">
       </div>
+      <div class="legend" id="gtLegend" style="display: none;">
+        <span style="--swatch: #388bfd;">Cloud</span>
+        <span style="--swatch: #ff8c00;">Smoke (not cloud)</span>
+        <span style="--swatch: #a0a0a0;">Unsure</span>
+      </div>
+      <div class="sample-note" id="sampleNote"></div>
 
     </div>
 
@@ -462,6 +490,7 @@
 
 <!-- Load Precomputed Manifest if present -->
 <script src="samples_data.js"></script>
+<script src="gt_samples_data.js"></script>
 
 <script>
   // Fallback sample data in case samples_data.js hasn't been generated yet
@@ -488,7 +517,20 @@
     }
   ];
 
-  const SAMPLES = (typeof SAMPLES_MANIFEST !== 'undefined') ? SAMPLES_MANIFEST : DEFAULT_SAMPLES;
+  const ENSEMBLE_SAMPLES = (typeof SAMPLES_MANIFEST !== 'undefined') ? SAMPLES_MANIFEST : DEFAULT_SAMPLES;
+  const GT_SAMPLES = (typeof GT_SAMPLES_MANIFEST !== 'undefined') ? GT_SAMPLES_MANIFEST : [];
+  const SAMPLE_SECTIONS = [
+    { title: 'SAM + OmniCloudMask ensemble', items: ENSEMBLE_SAMPLES },
+    { title: 'Hand-checked ground truth vs. OmniCloudMask', items: GT_SAMPLES },
+  ].filter(s => s.items.length);
+  const SAMPLES = SAMPLE_SECTIONS.flatMap(s => s.items);
+
+  // Which views a sample has an image for
+  function availableTabs(s) {
+    if (activeMode === 'live') return ['orig', 'consensus', 'sam', 'omni'];
+    return ['orig', 'gt', 'consensus', 'sam', 'omni'].filter(t => s && s[t]);
+  }
+  const fmt = v => (v === undefined || v === null) ? 'n/a' : `${v}%`;
 
   // DOM Elements
   const btnModePrecomputed = document.getElementById('btnModePrecomputed');
@@ -502,6 +544,10 @@
   const consensusMetric = document.getElementById('consensusMetric');
   const samMetric = document.getElementById('samMetric');
   const omniMetric = document.getElementById('omniMetric');
+  const gtMetric = document.getElementById('gtMetric');
+  const gtSmokeMetric = document.getElementById('gtSmokeMetric');
+  const gtLegend = document.getElementById('gtLegend');
+  const sampleNote = document.getElementById('sampleNote');
   const tabBtns = document.querySelectorAll('.tab-btn');
 
   let activeMode = 'precomputed';
@@ -514,44 +560,80 @@
   // Render Sample List
   function initSamples() {
     sampleListContainer.innerHTML = '';
-    SAMPLES.forEach((s, idx) => {
-      const item = document.createElement('div');
-      item.className = `sample-item ${idx === 0 ? 'active' : ''}`;
-      item.innerHTML = `
-        <div style="font-size: 1.6rem;">🛰️</div>
-        <div class="sample-info">
-          <div class="sample-name">${s.title}</div>
-          <div class="sample-sub">${s.desc || 'Optical satellite tile'} &bull; Consensus: ${s.metrics.consensus}%</div>
-        </div>
-      `;
-      item.addEventListener('click', () => {
-        document.querySelectorAll('.sample-item').forEach(el => el.classList.remove('active'));
-        item.classList.add('active');
-        activeSample = s;
-        renderDisplay();
+    SAMPLE_SECTIONS.forEach(section => {
+      const header = document.createElement('div');
+      header.className = 'sample-section';
+      header.textContent = section.title;
+      sampleListContainer.appendChild(header);
+
+      section.items.forEach(s => {
+        const isGt = s.kind === 'gt';
+        const summary = isGt
+          ? `${s.crop} (${s.split}) &bull; Cloud: ${s.metrics.gt}% &bull; OCM: ${s.metrics.omni}%`
+          : `${s.desc || 'Optical satellite tile'} &bull; Consensus: ${s.metrics.consensus}%`;
+        const item = document.createElement('div');
+        item.className = `sample-item ${s === activeSample ? 'active' : ''}`;
+        item.innerHTML = `
+          <div style="font-size: 1.6rem;">${isGt ? '✏️' : '🛰️'}</div>
+          <div class="sample-info">
+            <div class="sample-name">${s.title}</div>
+            <div class="sample-sub">${summary}</div>
+          </div>
+        `;
+        item.addEventListener('click', () => {
+          document.querySelectorAll('.sample-item').forEach(el => el.classList.remove('active'));
+          item.classList.add('active');
+          activeSample = s;
+          // Ground-truth samples open on the ground truth; others keep their usual default
+          if (isGt) activeTab = 'gt';
+          else if (activeTab === 'gt') activeTab = 'consensus';
+          renderDisplay();
+        });
+        sampleListContainer.appendChild(item);
       });
-      sampleListContainer.appendChild(item);
+    });
+  }
+
+  function syncTabs() {
+    const avail = availableTabs(activeSample);
+    if (!avail.includes(activeTab)) activeTab = avail.includes('consensus') ? 'consensus' : avail[0];
+    tabBtns.forEach(b => {
+      const t = b.getAttribute('data-tab');
+      b.disabled = !avail.includes(t);
+      b.title = b.disabled
+        ? (t === 'gt' ? 'No hand-checked mask for this tile' : 'Not run on this crop')
+        : '';
+      b.classList.toggle('active', t === activeTab);
     });
   }
 
   // Render Display
   function renderDisplay() {
-    if (activeMode === 'precomputed' && activeSample) {
-      consensusMetric.textContent = `${activeSample.metrics.consensus}%`;
-      samMetric.textContent = `${activeSample.metrics.sam}%`;
-      omniMetric.textContent = `${activeSample.metrics.omni}%`;
+    syncTabs();
+    gtLegend.style.display = activeTab === 'gt' ? 'flex' : 'none';
 
-      if (activeTab === 'consensus') mainResultImg.src = activeSample.consensus;
-      else if (activeTab === 'sam') mainResultImg.src = activeSample.sam;
-      else if (activeTab === 'omni') mainResultImg.src = activeSample.omni;
+    if (activeMode === 'precomputed' && activeSample) {
+      const m = activeSample.metrics;
+      gtMetric.textContent = fmt(m.gt);
+      gtSmokeMetric.textContent = m.gt_smoke ? `+ ${m.gt_smoke}% smoke` : '';
+      consensusMetric.textContent = fmt(m.consensus);
+      samMetric.textContent = fmt(m.sam);
+      omniMetric.textContent = fmt(m.omni);
+      sampleNote.textContent = activeSample.kind === 'gt'
+        ? `${activeSample.desc} Ground truth: OCM's draft, then fixed by hand in CVAT. Percentages are the share of the crop marked as cloud.`
+        : '';
+
+      if (activeSample[activeTab]) mainResultImg.src = activeSample[activeTab];
     } else if (activeMode === 'live') {
+      gtMetric.textContent = 'n/a';
+      gtSmokeMetric.textContent = '';
+      sampleNote.textContent = '';
       consensusMetric.textContent = liveMetrics.consensus;
       samMetric.textContent = liveMetrics.sam;
       omniMetric.textContent = liveMetrics.omni;
 
-      if (liveImages[activeTab]) {
-        mainResultImg.src = liveImages[activeTab];
-      }
+      const src = activeTab === 'orig' ? imagePreview.src : liveImages[activeTab];
+      if (src) mainResultImg.src = src;
     }
   }
 
