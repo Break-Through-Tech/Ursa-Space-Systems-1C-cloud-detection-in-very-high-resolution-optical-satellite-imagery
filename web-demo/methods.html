@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Methods | Cloud Detection Benchmark</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+
+  <nav class="topnav" aria-label="Site">
+    <a class="brand" href="cloud-segmentation-app.html">Cloud Detection Benchmark</a>
+    <div class="topnav-links"><a href="cloud-segmentation-app.html">Home</a><a href="methods.html" aria-current="page">Methods</a><a href="explore.html">Explore crops</a><a href="about.html">Team &amp; credits</a></div>
+  </nav>
+
+  <header class="page-plain">
+    <h1>Methods</h1>
+    <p>Four classical methods built from simple rules about how clouds look, and one pretrained deep-learning model. All five get the same crops and are scored against the same hand-checked masks.</p>
+    <div class="jump"><a href="#classical">Classical methods</a><a href="#ocm">OmniCloudMask</a><a href="#ground-truth">Ground truth</a><a href="#fair">Fair comparison</a></div>
+  </header>
+
+  <section class="section reveal" id="classical">
+    <div class="section-head">
+      <h2 class="section-title">Classical methods</h2>
+      <p class="section-lead">RGB only and no training data. Each one gives every pixel a score and calls it cloud above a cutoff.</p>
+    </div>
+    <div class="method-grid">
+      <div class="card method-card">
+        <div class="method-head"><h3>Brightness + whiteness</h3><span class="method-tag ">2 thresholds</span></div>
+        <div class="method-idea">Clouds are bright <em>and</em> colorless: red, green and blue are all high and about equal.</div>
+        <div class="rule">cloud = brightness &ge; b&nbsp;&nbsp;AND&nbsp;&nbsp;whiteness &le; w</div>
+        <details class="more">
+          <summary>How it works</summary>
+          <div class="more-body">
+            <p>Brightness is the average of R, G and B. Whiteness measures how far the three bands are from their average, so 0 means perfectly grey or white. Both cutoffs are picked together on the validation crops.</p>
+            <div class="pros-cons">
+              <div class="good"><h4>Good at</h4><ul><li>Thick, bright cloud</li><li>Fast and easy to explain</li></ul></div>
+              <div class="bad"><h4>Struggles with</h4><ul><li>White rooftops, sand and snow</li><li>Thin cloud, which is darker and takes on the ground's color</li></ul></div>
+            </div>
+            <div class="method-source">Zhu &amp; Woodcock (2012), the Fmask paper. Whiteness test from G&oacute;mez-Chova et al. (2007).</div>
+          </div>
+        </details>
+      </div>
+      <div class="card method-card">
+        <div class="method-head"><h3>Dark-channel prior</h3><span class="method-tag ">1 threshold</span></div>
+        <div class="method-idea">Clear ground almost always has something dark nearby, like a shadow, a tree or water. Cloud and haze wash that out.</div>
+        <div class="rule">dark channel = darkest of R, G, B in a 15&times;15 patch</div>
+        <details class="more">
+          <summary>How it works</summary>
+          <div class="more-body">
+            <p>For every pixel it takes the darkest band, then the darkest value in the surrounding patch. If even that is bright, the area is probably cloud or haze. The cutoff is picked on the validation crops.</p>
+            <div class="pros-cons">
+              <div class="good"><h4>Good at</h4><ul><li>Haze and thin cloud</li><li>Ignoring a single bright pixel next to dark ground</li></ul></div>
+              <div class="bad"><h4>Struggles with</h4><ul><li>Large, evenly bright surfaces</li><li>Exact cloud edges, since the patch blurs them</li></ul></div>
+            </div>
+            <div class="method-source">He, Sun &amp; Tang (2009), <em>Single image haze removal using dark channel prior</em>, CVPR.</div>
+          </div>
+        </details>
+      </div>
+      <div class="card method-card">
+        <div class="method-head"><h3>HOT (haze-optimized transform)</h3><span class="method-tag ">1 threshold</span></div>
+        <div class="method-idea">Haze and cloud raise blue more than red, compared with clear ground.</div>
+        <div class="rule">HOT = distance above the clear-sky line (blue vs. red)</div>
+        <details class="more">
+          <summary>How it works</summary>
+          <div class="more-body">
+            <p>On clear ground, blue and red follow a steady straight-line relationship. We fit that line on the pixels marked clear in the validation masks, then score each pixel by how far above the line it sits.</p>
+            <div class="pros-cons">
+              <div class="good"><h4>Good at</h4><ul><li>Thin cloud and haze</li><li>Uses color, not just brightness</li></ul></div>
+              <div class="bad"><h4>Struggles with</h4><ul><li>Noise at high resolution, which usually needs a median filter (not added yet)</li><li>Surfaces that are naturally blue-ish</li></ul></div>
+            </div>
+            <div class="method-source">Zhang, Guindon &amp; Cihlar (2002), <em>Remote Sensing of Environment</em> 82.</div>
+          </div>
+        </details>
+      </div>
+      <div class="card method-card">
+        <div class="method-head"><h3>Otsu threshold</h3><span class="method-tag warm">no tuning</span></div>
+        <div class="method-idea">Let each image pick its own brightness cutoff automatically.</div>
+        <div class="rule">cloud = brightness &gt; Otsu cutoff for this image</div>
+        <details class="more">
+          <summary>How it works</summary>
+          <div class="more-body">
+            <p>Otsu's method splits an image's brightness histogram into the two groups that are most different from each other. Nothing is tuned, so it shows how far a fully automatic rule gets.</p>
+            <div class="pros-cons">
+              <div class="good"><h4>Good at</h4><ul><li>Crops with a clear mix of cloud and ground</li><li>Needs no labeled data at all</li></ul></div>
+              <div class="bad"><h4>Struggles with</h4><ul><li>Crops that are all cloud or all clear, where it still splits the image in two</li><li>Bright ground, like the brightness rule</li></ul></div>
+            </div>
+            <div class="method-source">Otsu (1979), <em>IEEE Transactions on Systems, Man, and Cybernetics</em> 9(1).</div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="section reveal" id="ocm">
+    <div class="section-head">
+      <h2 class="section-title">OmniCloudMask (OCM)</h2>
+      <p class="section-lead">An open-source neural network trained to find cloud across many different satellites. We use it as-is, with no retraining.</p>
+    </div>
+    <div class="card ocm-card">
+      <div class="ocm-col">
+        <p>Tested by its authors on Sentinel-2, Landsat 8, PlanetScope and Maxar. Our Challenge Advisor pointed us to it.</p>
+        <div>
+          <p style="margin-bottom: 6px;">It labels every pixel as one of four classes. We merge thick and thin cloud into one cloud class:</p>
+          <div class="class-chips">
+            <span class="class-chip" style="--c: #9aa9bb;">Clear</span>
+            <span class="class-chip merged" style="--c: var(--mask-omni);">Thick cloud</span>
+            <span class="class-chip merged" style="--c: var(--mask-omni);">Thin cloud</span>
+            <span class="class-chip" style="--c: #5b4b8a;">Cloud shadow</span>
+          </div>
+        </div>
+        <div class="method-source">Wright et al. (2025), <em>Remote Sensing of Environment</em> 322. MIT license.
+          <a href="https://github.com/DPIRD-DMA/OmniCloudMask" target="_blank" rel="noopener">Code on GitHub</a></div>
+      </div>
+      <div class="ocm-col">
+        <div class="ocm-subhead">The catch</div>
+        <ul>
+          <li><strong>No near-infrared band.</strong> OCM expects red, green and NIR. Our imagery is RGB only, so NIR is filled with zeros.</li>
+          <li><strong>Shrunk to about 10&nbsp;m per pixel</strong>, closer to the 10&ndash;50&nbsp;m imagery it was built for.</li>
+          <li><strong>Smoke gets called cloud.</strong> In our wildfire crops OCM often marks smoke as cloud.</li>
+        </ul>
+        <details class="more">
+          <summary>Why this matters</summary>
+          <div class="more-body">
+            <p>Missing NIR and the change in resolution could both make OCM look worse on our imagery than it really is. Testing it with a real NIR band is one of our stretch goals.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="section reveal" id="ground-truth">
+    <div class="section-head">
+      <h2 class="section-title">How we made the ground truth</h2>
+      <p class="section-lead">No cloud masks exist for this imagery, so we labeled our own in CVAT, two different ways.</p>
+    </div>
+    <div class="info-grid">
+      <div class="card">
+        <h3>Hand-only</h3>
+        <p>Labeled pixel by pixel from a blank mask. Fully independent of every method we score.</p>
+      </div>
+      <div class="card">
+        <h3>OCM-assisted</h3>
+        <p>OCM makes a first draft, then every mask is fixed by hand with a pen tablet. Smoke and unsure areas get their own labels.</p>
+        <details class="more">
+          <summary>Why two ways?</summary>
+          <div class="more-body">
+            <p>Starting from OCM's draft saves time, but could favor OCM when it's scored. Scoring on both mask sets shows whether that happens.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="section reveal" id="fair">
+    <div class="section-head">
+      <h2 class="section-title">Keeping the comparison fair</h2>
+    </div>
+    <div class="fair-steps">
+      <div class="fair-step"><strong>Same masks for everyone</strong>Every method is scored against the same hand-checked crops.</div>
+      <div class="fair-step"><strong>Tune on validation only</strong>Cutoffs are picked for the best F1 on validation crops and never see the test crops.</div>
+      <div class="fair-step"><strong>Smoke scored separately</strong>Smoke and unsure pixels are left out of the main scores, with a separate smoke check.</div>
+      <div class="fair-step"><strong>Same metrics</strong>Per-pixel IoU, precision, recall and F1, plus predicted vs. true cloud cover.</div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <p>Ursa Space Systems 1C &bull; Break Through Tech AI Studio &bull; Fall 2026</p>
+  <p>Imagery: Maxar Open Data Program (CC BY-NC 4.0)</p>
+</footer>
+
+<script src="site.js"></script>
+</body>
+</html>
