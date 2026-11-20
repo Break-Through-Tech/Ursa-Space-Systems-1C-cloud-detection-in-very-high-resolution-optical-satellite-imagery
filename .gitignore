@@ -1,2 +1,31 @@
+# --- Machine Learning Model Weights (Critical: >100 MB blocks git push) ---
+*.pth
+*.pt
+*.onnx
+sam_vit_b_01ec64.pth
 
+# --- Python Cache & Bytecode ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Virtual Environments ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- Environment Variables & Secrets ---
+.env
+*.env
+
+# --- Operating System Junk ---
 .DS_Store
+Thumbs.db
+ehthumbs.db
+
+# --- Large Raw Satellite Datasets (Keep sample images small) ---
+*.tif
+*.tiff
+*.tar.gz
+*.zip
