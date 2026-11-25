@@ -38,7 +38,7 @@
   <!-- Live Backend URL Banner (Shown in Live Mode) -->
   <div class="backend-config" id="liveConfigBanner" style="display: none;">
     <label for="backendUrl">Backend API Endpoint:</label>
-    <input type="text" id="backendUrl" value="http://localhost:8000" placeholder="e.g. https://xxxx.trycloudflare.com">
+    <input type="text" id="backendUrl" value="http://localhost:8001" placeholder="e.g. https://xxxx.trycloudflare.com">
     <div class="status-indicator">
       <span class="dot" id="statusDot"></span>
       <span id="statusText">Connecting...</span>
@@ -365,7 +365,9 @@
     statusText.textContent = 'Connecting...';
     try {
       const resp = await fetch(url + '/', { method: 'GET' });
-      if (resp.ok) {
+      // Check the JSON body too: a plain file server also answers GET / with 200.
+      const body = resp.ok ? await resp.json().catch(() => null) : null;
+      if (body && body.status === 'ok') {
         statusDot.className = 'dot connected';
         statusText.textContent = 'Backend online';
       } else throw new Error();

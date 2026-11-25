@@ -157,5 +157,13 @@ def health_check():
     return {"status": "ok", "message": "Cloud segmentation backend is running."}
 
 if __name__ == "__main__":
+    import argparse
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    # The static site is served on 8000 (python -m http.server 8000), so the
+    # backend defaults to 8001 to avoid fighting over the same port.
+    parser = argparse.ArgumentParser(description="Cloud detection backend")
+    parser.add_argument("--host", default=os.environ.get("HOST", "0.0.0.0"))
+    parser.add_argument("--port", type=int, default=int(os.environ.get("PORT", 8001)))
+    args = parser.parse_args()
+    uvicorn.run(app, host=args.host, port=args.port)
