@@ -104,16 +104,16 @@ This mode sends an uploaded image to `server.py`, which runs SAM and OmniCloudMa
 
         python server.py
 
-   On first run it downloads the SAM checkpoint (`sam_vit_b_01ec64.pth`, about 375 MB). When it's ready it prints `Uvicorn running on http://0.0.0.0:8000`. Without a GPU, each image takes about 30 seconds.
+   On first run it downloads the SAM checkpoint (`sam_vit_b_01ec64.pth`, about 375 MB). When it's ready it prints `Uvicorn running on http://0.0.0.0:8001`. It uses port 8001 so it doesn't clash with the file server on 8000; pass `--port N` (or set `PORT`) to change it. Without a GPU, each image takes about 30 seconds.
 
-3. On the **Explore crops** page, choose **Try your own image**. The backend address box defaults to `http://localhost:8000`.
+3. On the **Explore crops** page, choose **Try your own image**. The backend address box defaults to `http://localhost:8001`.
 
 ### Letting others try it (Cloudflare Tunnel)
 
 To let someone use your running backend from their own device:
 
 1. Start `server.py` as above.
-2. In a second terminal: `cloudflared tunnel --url http://localhost:8000`
+2. In a second terminal: `cloudflared tunnel --url http://localhost:8001`
 3. Paste the `https://….trycloudflare.com` address it prints into the backend address box.
 
 This only works while your computer and the server are running.
@@ -142,6 +142,14 @@ It returns:
 ## Hosting
 
 A live copy is on Chidera's school web space: <https://web.njit.edu/~cwo3/breakthroughtechApp/cloud-segmentation-app.html>. It may be behind this branch until the new files are uploaded there.
+
+### GitHub Pages
+
+`.github/workflows/pages.yml` publishes this folder to GitHub Pages whenever `web-demo/` changes on `main` (or when run by hand from the Actions tab). A repo admin has to turn it on once: **Settings → Pages → Source: GitHub Actions**. The site then lives at <https://break-through-tech.github.io/Ursa-Space-Systems-1C-cloud-detection-in-very-high-resolution-optical-satellite-imagery/>.
+
+`index.html` just redirects to `cloud-segmentation-app.html`, so the bare site URL opens the home page.
+
+Pages only serves static files, so `server.py` doesn't run there. The pages and sample galleries work. For live predictions on the Explore page, host the backend somewhere that runs Python (for example Hugging Face Spaces or Render) and paste its URL into the backend field.
 
 ## Known issues
 

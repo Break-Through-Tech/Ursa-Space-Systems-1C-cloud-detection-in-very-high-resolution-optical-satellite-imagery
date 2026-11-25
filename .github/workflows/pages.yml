@@ -1,0 +1,37 @@
+# Publishes the static web demo (web-demo/) to GitHub Pages.
+# One-time setup: repo Settings -> Pages -> Source: "GitHub Actions".
+# The FastAPI backend (server.py) does not run on Pages; host it elsewhere
+# and paste its URL into the Explore page for live predictions.
+name: Deploy web demo to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ['web-demo/**', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Drop files the site doesn't need
+        run: rm -rf web-demo/__pycache__
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web-demo
+      - id: deployment
+        uses: actions/deploy-pages@v4
