@@ -5,11 +5,8 @@ New project website design reviewed: same layout, bluer look matching the slides
 Website Redesign
 
 Layout unchanged; colors made bluer to match the team's PowerPoint aesthetic, with a subtle blue color transition at the bottom.
-
 Homepage explains the project's purpose, what's hard about the question, and will show the scores achieved.
-
 Methods page covers the four classical methods and Omnicloud mask, plus how masks were made (handmade and assisted) and why the human comparison is fair.
-
 Explore crops page keeps the existing crop explorer and 'try your own image' tool, adds a ground truth mask tab and a sample gallery (hand-checked truth mask vs Omnicloud).
 
 Team credits pull LinkedIn and GitHub from the README, plus thanks to the challenge advisor, coach, tech and models; photos pending finished slides.
